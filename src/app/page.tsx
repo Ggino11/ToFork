@@ -48,7 +48,7 @@ export default function TorinoRestaurantsMap() {
             };
           })
           .filter((el: any) => el.lat && el.lon && el.name) // filtro ristoranti con nome
-          .slice(0, 300); // prendi solo i primi 50
+          .slice(0, 300); // prendi solo i primi 300
 
         setRestaurants(places);
       })
