@@ -36,7 +36,6 @@ export default function TorinoRestaurantsMap() {
           .map((el: any) => {
             let lat = el.lat;
             let lon = el.lon;
-            // per way/relation usa il centro
             if (!lat && el.center) {
               lat = el.center.lat;
               lon = el.center.lon;
@@ -48,7 +47,8 @@ export default function TorinoRestaurantsMap() {
               name: el.tags?.name,
             };
           })
-          .filter((el: any) => el.lat && el.lon);
+          .filter((el: any) => el.lat && el.lon && el.name) // filtro ristoranti con nome
+          .slice(0, 300); // prendi solo i primi 50
 
         setRestaurants(places);
       })
