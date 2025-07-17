@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+/* import '@/utils/fixLeafletIcon'; */
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 
@@ -15,6 +16,7 @@ export default function TorinoRestaurantsMap() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 
   useEffect(() => {
+    import('@/utils/fixLeafletIcon');
     const query = `
       [out:json][timeout:25];
       area["name"="Torino"]["boundary"="administrative"]->.searchArea;
@@ -48,7 +50,7 @@ export default function TorinoRestaurantsMap() {
             };
           })
           .filter((el: any) => el.lat && el.lon && el.name) // filtro ristoranti con nome
-          .slice(0, 300); // prendi solo i primi 300
+          .slice(0, 300); // prendi solo i primi 50
 
         setRestaurants(places);
       })
