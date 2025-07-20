@@ -10,6 +10,9 @@ interface Restaurant {
   lat: number;
   lon: number;
   name?: string;
+  opening_hours?: string;
+  phone?: string;
+  cuisine?: string;
 }
 
 export default function TorinoRestaurantsMap() {
@@ -35,22 +38,26 @@ export default function TorinoRestaurantsMap() {
       .then(res => res.json())
       .then(data => {
         const places: Restaurant[] = data.elements
-          .map((el: any) => {
-            let lat = el.lat;
-            let lon = el.lon;
-            if (!lat && el.center) {
-              lat = el.center.lat;
-              lon = el.center.lon;
-            }
-            return {
-              id: el.id,
-              lat,
-              lon,
-              name: el.tags?.name,
-            };
-          })
-          .filter((el: any) => el.lat && el.lon && el.name) // filtro ristoranti con nome
-          .slice(0, 300); // prendi solo i primi 50
+        .map((el: any) => {
+          let lat = el.lat;
+          let lon = el.lon;
+          if (!lat && el.center) {
+            lat = el.center.lat;
+            lon = el.center.lon;
+          }
+          return {
+            id: el.id,
+            lat,
+            lon,
+            name: el.tags?.name,
+            opening_hours: el.tags?.opening_hours,
+            phone: el.tags?.phone || el.tags?.['contact:phone'],
+            website: el.tags?.website,
+            cuisine: el.tags?.cuisine,
+          };
+        })
+        .filter((el: any) => el.lat && el.lon && el.name)
+        .slice(0, 50); // prendi solo i primi 50
 
         setRestaurants(places);
       })
@@ -66,7 +73,13 @@ export default function TorinoRestaurantsMap() {
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
         {restaurants.map(r => (
           <Marker key={r.id} position={[r.lat, r.lon]}>
-            <Popup>{r.name || 'Ristorante senza nome'}</Popup>
+            <Popup>
+              <strong>{r.name}</strong><br />
+              {r.cuisine && <>🍽 {r.cuisine}<br /></>}
+              {r.opening_hours && <>🕒 {r.opening_hours}<br /></>}
+              {r.phone && <>📞 {r.phone}<br /></>}
+            </Popup>
+
           </Marker>
         ))}
       </MapContainer>
