@@ -62,7 +62,7 @@ export default function Navbar({ user }: NavbarProps) {
           ) : (
             <>
               <Link
-                href="/login"
+                href="/auth"
                 className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-logo text-white hover:bg-orange-700 transition"
               >
                 <FaUserCircle /> Login
