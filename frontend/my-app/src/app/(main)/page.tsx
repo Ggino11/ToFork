@@ -39,11 +39,11 @@ export default function Home() {
         <h2 className="text-2xl font-semibold mb-6 text-black">Offerte Esclusive</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="relative rounded-lg overflow-hidden">
-            <Image src="/mellica.jpg" alt="Mellica" width={400} height={250} />
+            <Image src="/mollica.jpg" alt="Mollica" width={400} height={250} />
             <span className="absolute top-2 left-2 bg-black text-white px-2 py-1 text-xs rounded">-40%</span>
           </div>
           <div className="relative rounded-lg overflow-hidden">
-            <Image src="/mrbun.jpg" alt="Mr Bun" width={400} height={250} />
+            <Image src="/mcbun.jpg" alt="Mr Bun" width={400} height={250} />
             <span className="absolute top-2 left-2 bg-black text-white px-2 py-1 text-xs rounded">-35%</span>
           </div>
           <div className="relative rounded-lg overflow-hidden">
@@ -85,9 +85,9 @@ export default function Home() {
         <h2 className="text-2xl font-semibold mb-6 text-black">Popular Restaurants</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
           <Image src="/streetfood.jpg" alt="Street Food" width={150} height={100} className="rounded-lg"/>
-          <Image src="/pasta.jpg" alt="Pasta 101" width={150} height={100} className="rounded-lg"/>
-          <Image src="/mellica.jpg" alt="Mellica" width={150} height={100} className="rounded-lg"/>
-          <Image src="/scannabe.jpg" alt="Scannabe" width={150} height={100} className="rounded-lg"/>
+          <Image src="/pasta.jpg" alt="Pasta" width={150} height={100} className="rounded-lg"/>
+          <Image src="/mollica.jpg" alt="Mollica" width={150} height={100} className="rounded-lg"/>
+          <Image src="/scannabue.jpg" alt="Scannabue" width={150} height={100} className="rounded-lg"/>
           <Image src="/bestburger.jpg" alt="Best Burger" width={150} height={100} className="rounded-lg"/>
         </div>
       </section>
