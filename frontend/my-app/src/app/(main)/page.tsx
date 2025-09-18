@@ -20,12 +20,12 @@ export default function Home() {
           <input
             type="text"
             placeholder="Cerca ristorante..."
-            className="w-full sm:w-auto px-4 py-2 rounded-lg text-black"
+            className="w-full sm:w-auto px-4 py-2 rounded-lg text-black bg-white border border-black-300"
           />
         </div>
         <div className="sm:w-1/2 flex justify-center">
           <Image
-            src="/hero-image.png"
+            src="/foto_1.png"
             alt="Ragazza con pizza"
             width={400}
             height={400}
@@ -36,7 +36,7 @@ export default function Home() {
 
       {/* Offerte Esclusive */}
       <section>
-        <h2 className="text-2xl font-semibold mb-6">Offerte Esclusive</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-black">Offerte Esclusive</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="relative rounded-lg overflow-hidden">
             <Image src="/mellica.jpg" alt="Mellica" width={400} height={250} />
@@ -55,7 +55,7 @@ export default function Home() {
 
       {/* Categorie Popolari */}
       <section>
-        <h2 className="text-2xl font-semibold mb-6">Categorie Popolari 🍕</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-black">Categorie Popolari 🍕</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
           <div className="flex flex-col items-center gap-2">
             <Image src="/burger.jpg" alt="Burger" width={80} height={80} className="rounded-full"/>
@@ -82,7 +82,7 @@ export default function Home() {
 
       {/* Popular Restaurants */}
       <section>
-        <h2 className="text-2xl font-semibold mb-6">Popular Restaurants</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-black">Popular Restaurants</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
           <Image src="/streetfood.jpg" alt="Street Food" width={150} height={100} className="rounded-lg"/>
           <Image src="/pasta.jpg" alt="Pasta 101" width={150} height={100} className="rounded-lg"/>

@@ -22,7 +22,7 @@ interface NavbarProps {
 export default function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
   return (
-    <nav className=" fixed w-full bg-white shadow-md px-6 py-1 flex items-center">
+    <nav className=" fixed w-full z-50 bg-white shadow-md px-6 py-1 flex items-center">
       {/* Logo */}
       <Link href="/" className="">
         <Image src="/Logo.svg" width={200} height={60} alt="ToFork logo" />
