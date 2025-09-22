@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-// da rimuovere 
-// const dummyUser = {
-//   name: "Mario",
-//   lastName: "Rossi",
-//   email: "mario.rossi@email.com",
-// };
+//da rimuovere 
+const dummyUser = {
+  name: "Mario",
+  lastName: "Rossi",
+  email: "mario.rossi@email.com",
+};
 export const metadata: Metadata = {
   title: "ToFork",
   description: "Booking and reservation platform for restaurants located in Turin, Italy.",
@@ -37,7 +37,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar user={null} />
+        <Navbar user={dummyUser} />
         {children}
          <Footer />
       </body>
