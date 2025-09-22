@@ -84,11 +84,11 @@ export default function Home() {
       <section>
         <h2 className="text-2xl font-semibold mb-6 text-black">Popular Restaurants</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          <Image src="/streetfood.jpg" alt="Street Food" width={150} height={100} className="rounded-lg"/>
-          <Image src="/pasta.jpg" alt="Pasta" width={150} height={100} className="rounded-lg"/>
-          <Image src="/mollica.jpg" alt="Mollica" width={150} height={100} className="rounded-lg"/>
-          <Image src="/scannabue.jpg" alt="Scannabue" width={150} height={100} className="rounded-lg"/>
-          <Image src="/bestburger.jpg" alt="Best Burger" width={150} height={100} className="rounded-lg"/>
+          <Image src="/crostone.png" alt="Street Food" width={150} height={100} className="rounded-lg"/>
+          <Image src="/piola.png" alt="Pasta" width={150} height={100} className="rounded-lg"/>
+          <Image src="/mollica.png" alt="Mollica" width={150} height={150} className="rounded-lg"/>
+          <Image src="/scannabue.png" alt="Scannabue" width={150} height={100} className="rounded-lg"/>
+          <Image src="/rockburger.png" alt="Best Burger" width={150} height={100} className="rounded-lg"/>
         </div>
       </section>
 
