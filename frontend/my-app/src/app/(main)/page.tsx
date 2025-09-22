@@ -39,15 +39,15 @@ export default function Home() {
         <h2 className="text-2xl font-semibold mb-6 text-black">Offerte Esclusive</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="relative rounded-lg overflow-hidden">
-            <Image src="/mollica.jpg" alt="Mollica" width={400} height={250} />
+            <Image src="/mollica.png" alt="Mollica" width={400} height={250} />
             <span className="absolute top-2 left-2 bg-black text-white px-2 py-1 text-xs rounded">-40%</span>
           </div>
           <div className="relative rounded-lg overflow-hidden">
-            <Image src="/mcbun.jpg" alt="Mr Bun" width={400} height={250} />
+            <Image src="/panino.png" alt="Mr Bun" width={400} height={250} />
             <span className="absolute top-2 left-2 bg-black text-white px-2 py-1 text-xs rounded">-35%</span>
           </div>
           <div className="relative rounded-lg overflow-hidden">
-            <Image src="/pizzeria.jpg" alt="Da Zero" width={400} height={250} />
+            <Image src="/da_zero.png" alt="Da Zero" width={400} height={250} />
             <span className="absolute top-2 left-2 bg-black text-white px-2 py-1 text-xs rounded">-20%</span>
           </div>
         </div>
@@ -58,24 +58,24 @@ export default function Home() {
         <h2 className="text-2xl font-semibold mb-6 text-black">Categorie Popolari 🍕</h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
           <div className="flex flex-col items-center gap-2">
-            <Image src="/burger.jpg" alt="Burger" width={80} height={80} className="rounded-full"/>
-            <span>Burger & Fastfood</span>
+            <Image src="/burger.png" alt="Burger" width={130} height={130} className="rounded"/>
+            <span className="text-black">Burger & Fastfood</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Image src="/insalate.jpg" alt="Insalate" width={80} height={80} className="rounded-full"/>
-            <span>Insalate</span>
+            <Image src="/insalata.png" alt="Insalata" width={130} height={130} className="rounded"/>
+            <span className="text-black">Insalata</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Image src="/pasta.jpg" alt="Pasta" width={80} height={80} className="rounded-full"/>
-            <span>Pasta</span>
+            <Image src="/pasta.png" alt="Pasta" width={130} height={130} className="rounded"/>
+            <span className="text-black">Pasta</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Image src="/pizza.jpg" alt="Pizza" width={80} height={80} className="rounded-full"/>
-            <span>Pizza</span>
+            <Image src="/pizza.png" alt="Pizza" width={130} height={130} className="rounded"/>
+            <span className="text-black">Pizza</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Image src="/cibo-asiatico.jpg" alt="Cibo Asiatico" width={80} height={80} className="rounded-full"/>
-            <span>Cibo Asiatico</span>
+            <Image src="/cibo_asiatico.png" alt="Cibo Asiatico" width={130} height={130} className="rounded"/>
+            <span className="text-black">Cibo Asiatico</span>
           </div>
         </div>
       </section>
