@@ -5,6 +5,7 @@ import { useState } from "react";
 import Tabs from "../components/Tabs";
 import SearchBar from "../components/SearchBar";
 import RestaurantList from "../components/RestaurantList";
+import TorinoRestaurantsMap from "@/app/osm/page";
 
 const RistorantiPage = () => {
     const [selectedTab, setSelectedTab] = useState("");
@@ -22,6 +23,7 @@ const RistorantiPage = () => {
                 <SearchBar value={search} onChange={setSearch} />
             </div>
             <RestaurantList search={search} selectedTab={selectedTab} />
+            <TorinoRestaurantsMap />
         </main>
     );
 };
