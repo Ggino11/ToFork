@@ -6,7 +6,7 @@ import UserInfo from '../components/UserInfo';
 import Payments from '../components/Payments';
 import Orders from '../components/Orders';
 
-// Definisci un tipo per le viste possibili, per maggiore sicurezza
+// tipo per le viste possibili nella dashboard
 type ActiveView = 'profile' | 'payments' | 'orders';
 
 export default function ProfilePage() {

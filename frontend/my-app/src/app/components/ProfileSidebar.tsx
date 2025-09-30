@@ -51,7 +51,7 @@ export default function ProfileSidebar({ activeView, setActiveView }: ProfileSid
         <Link  href="/">
         <button
            onClick={handleLogout}
-           className="flex items-center gap-3 w-full px-4 py-3 text-red-500 rounded-lg hover:bg-red-50 transition-colors duration-200"
+           className="flex items-center gap-3 w-full px-4 py-3 text-orange-500 rounded-lg hover:bg-orange-50 transition-colors duration-200"
         >
             <FaSignOutAlt className="h-5 w-5" />
             <span className="font-semibold">Logout</span>

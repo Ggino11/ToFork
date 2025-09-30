@@ -1,6 +1,6 @@
 import ProfileAvatar from "@/app/components/ProfileAvatar"; // Assicurati che il percorso sia corretto!
 
-// Tipo per l'oggetto utente, utile per la type safety
+// Tipo per l'oggetto utente
 interface User {
   name: string;
   lastName: string;
@@ -13,52 +13,59 @@ interface UserInfoProps {
 
 export default function UserInfo({ user }: UserInfoProps) {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Informazioni Utente</h1>
-        <p className="text-gray-500 mt-1">Visualizza e aggiorna i tuoi dati personali.</p>
-      </div>
+    
+    <div >
 
-      <hr className="border-gray-200" />
-
-      {/* Sezione Foto Profilo */}
-      <div className="flex items-center gap-6">
-        <ProfileAvatar userName={user.name} userLastName={user.lastName} size={80} />
-        <div>
-          <h3 className="text-lg font-bold text-gray-800">Foto Profilo</h3>
-          <p className="text-sm text-gray-500 mb-3">Carica una nuova immagine.</p>
-          <button className="px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg hover:bg-orange-600 transition">
-            Cambia Foto
-          </button>
+      {/* 1. Header con Avatar e Informazioni Principali */}
+      <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-200">
+        <ProfileAvatar userName={user.name} userLastName={user.lastName} size={90} />
+        <div className="text-center sm:text-left">
+          <h1 className="text-3xl font-bold text-gray-900">{user.name} {user.lastName}</h1>
+          <p className="text-gray-500 mt-1">{user.email}</p>
         </div>
       </div>
 
-      <hr className="border-gray-200" />
-      
-      {/* Form Dati Utente */}
-      <form className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-            <input id="firstName" type="text" defaultValue={user.name} className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition" />
-          </div>
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Cognome</label>
-            <input id="lastName" type="text" defaultValue={user.lastName} className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition" />
-          </div>
-        </div>
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input id="email" type="email" defaultValue={user.email} className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition" />
-        </div>
+      {/* 2. Sezione Dati Personali */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold text-gray-800">Dati Personali</h2>
         
-        {/* Pulsante di Salvataggio */}
-        <div className="flex justify-end pt-4">
-          <button type="submit" className="px-8 py-2.5 font-bold text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-4 focus:ring-orange-300 transition">
-            Salva Modifiche
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Campo Nome */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Nome</label>
+            <p className="w-full px-4 py-3 bg-gray-100 text-gray-700 border border-gray-200 rounded-lg">
+              {user.name}
+            </p>
+          </div>
+          
+          {/* Campo Cognome */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Cognome</label>
+            <p className="w-full px-4 py-3 bg-gray-100 text-gray-700 border border-gray-200 rounded-lg">
+              {user.lastName}
+            </p>
+          </div>
         </div>
-      </form>
+
+        {/* Campo Email */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">Indirizzo Email</label>
+          <p className="w-full px-4 py-3 bg-gray-100 text-gray-700 border border-gray-200 rounded-lg">
+            {user.email}
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Spazio per Pulsanti Azione (esempio) */}
+      <div className="pt-6 border-t border-gray-200 flex justify-end gap-4">
+        <button type="button" className="px-6 py-2 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition">
+          Cambia Password
+        </button>
+        <button type="button" className="px-6 py-2 rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition">
+          Modifica Dati
+        </button>
+      </div>
+
     </div>
   );
 }
