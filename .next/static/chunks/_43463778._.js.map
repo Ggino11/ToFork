@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/ginot/Documents/Magistrale/TAAS/ToFork/src/utils/fixLeafletIcon.ts"],"sourcesContent":["import L from 'leaflet';\r\nimport icon from 'leaflet/dist/images/marker-icon.png';\r\nimport iconRetina from 'leaflet/dist/images/marker-icon-2x.png';\r\nimport shadow from 'leaflet/dist/images/marker-shadow.png';\r\n\r\ndelete (L.Icon.Default.prototype as any)._getIconUrl;\r\n\r\nL.Icon.Default.mergeOptions({\r\n  iconRetinaUrl: iconRetina.src ?? iconRetina,\r\n  iconUrl: icon.src ?? icon,\r\n  shadowUrl: shadow.src ?? shadow,\r\n});\r\n"],"names":[],"mappings":";AAAA;AACA;AACA;AACA;;;;;AAEA,OAAO,AAAC,oJAAA,CAAA,UAAC,CAAC,IAAI,CAAC,OAAO,CAAC,SAAS,CAAS,WAAW;IAGnC,iBACN,WACE;AAHb,oJAAA,CAAA,UAAC,CAAC,IAAI,CAAC,OAAO,CAAC,YAAY,CAAC;IAC1B,eAAe,CAAA,kBAAA,0JAAA,CAAA,UAAU,CAAC,GAAG,cAAd,6BAAA,kBAAkB,0JAAA,CAAA,UAAU;IAC3C,SAAS,CAAA,YAAA,oJAAA,CAAA,UAAI,CAAC,GAAG,cAAR,uBAAA,YAAY,oJAAA,CAAA,UAAI;IACzB,WAAW,CAAA,cAAA,sJAAA,CAAA,UAAM,CAAC,GAAG,cAAV,yBAAA,cAAc,sJAAA,CAAA,UAAM;AACjC","debugId":null}}]
-}
