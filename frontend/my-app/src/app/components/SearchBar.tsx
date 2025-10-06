@@ -12,7 +12,7 @@ const SearchBar = ({ value, onChange }: Props) => (
                        border-2 border-transparent rounded-full 
                        transition-all duration-300
                        focus:bg-white/20 focus:border-orange-400 focus:outline-none"
-            placeholder="Cerca un ristorante o un piatto..."
+            placeholder="Cerca un ristorante "
             value={value}
             onChange={e => onChange(e.target.value)}
         />

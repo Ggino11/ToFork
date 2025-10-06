@@ -7,7 +7,7 @@ import RestaurantList from "../components/RestaurantList";
 import TorinoRestaurantsMap from "@/app/osm/page";
 
 const RistorantiPage = () => {
-    const [selectedTab, setSelectedTab] = useState("Offerte");
+    const [selectedTab, setSelectedTab] = useState("");
     const [search, setSearch] = useState("");
 
     return (
