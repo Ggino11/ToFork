@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import './utils/fixLeafletIcon';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import dynamic from 'next/dynamic';
 
 interface Restaurant {
     id: number;
