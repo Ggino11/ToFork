@@ -5,31 +5,12 @@ import { useParams } from 'next/navigation';
 import restaurants from '../../components/restaurantsData';
 import CalendarBooking from '../../components/CalendarBooking';
 import FoodCard from '../../components/FoodCard';
-import Tabs from '../../components/Tabs';
-
-// --- Dati esempio menù (da API o file JSON in futuro) ---
-const menuData = {
-    Burgers: [
-        { id: 'b1', title: 'CHEL', description: 'Hamburger di manzo, insalata, pomodoro, maionese', price: 8.70, imageUrl: '/img/burger1.jpg' },
-        { id: 'b2', title: 'BUN CLASSICO', description: 'Con formaggio, cipolla e salsa BBQ', price: 9.90, imageUrl: '/img/burger2.jpg' },
-        { id: 'b3', title: 'VEG BURGER', description: 'Burger vegetariano con verdure grigliate', price: 9.20, imageUrl: '/img/burger3.jpg' },
-    ],
-    Patatine: [
-        { id: 'p1', title: 'PATATE CLASSICHE', description: 'Fritte croccanti con sale marino', price: 4.50, imageUrl: '/img/fries1.jpg' },
-        { id: 'p2', title: 'PATATE SPECIAL', description: 'Con cheddar fuso e pancetta', price: 6.00, imageUrl: '/img/fries2.jpg' },
-    ],
-    'Cold Drinks': [
-        { id: 'd1', title: 'Coca-Cola', description: '33cl', price: 2.50, imageUrl: '/img/drink1.jpg' },
-        { id: 'd2', title: 'Birra Artigianale', description: 'Bionda 50cl', price: 5.00, imageUrl: '/img/drink2.jpg' },
-    ],
-};
 
 const RistoranteDettaglioPage = () => {
     const { slug } = useParams();
     const restaurant = restaurants.find(r => r.slug === slug);
 
-    const [selectedTab, setSelectedTab] = useState('Burgers');
-
+    // Se il ristorante non è trovato
     if (!restaurant) {
         return (
             <div className="px-8 py-20 text-center">
@@ -37,6 +18,10 @@ const RistoranteDettaglioPage = () => {
             </div>
         );
     }
+
+    const menuData = restaurant.menu;
+    const categories = Object.keys(menuData);
+    const [selectedTab, setSelectedTab] = useState(categories[0] ?? '');
 
     const handleBookingSubmit = (details: { date: Date; time: string; guests: number }) => {
         alert(`Prenotazione per ${restaurant.name} il ${details.date.toLocaleDateString()} alle ${details.time} per ${details.guests} persone.`);
@@ -65,26 +50,24 @@ const RistoranteDettaglioPage = () => {
                             <li key={i}>{h}</li>
                         ))}
                     </ul>
-
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">Info</h3>
                     <p className="text-gray-700 mb-1"><strong>Indirizzo:</strong> {restaurant.address}</p>
                     <p className="text-gray-700 mb-1"><strong>Prezzo medio:</strong> {restaurant.averagePrice ?? 12}€</p>
                     <p className="text-gray-700 mb-1"><strong>Categoria:</strong> {restaurant.category}</p>
                 </div>
-
                 <div className="lg:w-1/3">
                     <CalendarBooking onBookingSubmit={handleBookingSubmit} />
                 </div>
             </div>
 
-
             {/* --- Sezione Menù --- */}
             <section className="mt-16">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900">Se vuoi puoi già preordinare i tuoi piatti!</h2>
-
+                <h2 className="text-2xl font-bold mb-4 text-gray-900">
+                    Se vuoi puoi già preordinare i tuoi piatti!
+                </h2>
                 {/* Tabs categorie piatti */}
                 <div className="my-6 p-3 bg-orange-500 rounded-xl shadow-lg flex items-center justify-center gap-4">
-                    {Object.keys(menuData).map(tab => (
+                    {categories.map(tab => (
                         <button
                             key={tab}
                             onClick={() => setSelectedTab(tab)}
@@ -98,10 +81,9 @@ const RistoranteDettaglioPage = () => {
                         </button>
                     ))}
                 </div>
-
                 {/* Lista piatti */}
                 <div className="space-y-10">
-                    {Object.entries(menuData)
+                    {menuData && Object.entries(menuData)
                         .filter(([category]) => category === selectedTab)
                         .map(([category, items]) => (
                             <div key={category}>
