@@ -5,11 +5,19 @@ import Tabs from "../components/Tabs";
 import SearchBar from "../components/SearchBar";
 import RestaurantList from "../components/RestaurantList";
 import TorinoRestaurantsMap from "@/app/osm/page";
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
 
 const RistorantiPage = () => {
     const [selectedTab, setSelectedTab] = useState("");
     const [search, setSearch] = useState("");
-
+    const RestaurantMap = useMemo(() => dynamic(
+    () => import('../components/Map'), // Assicurati che il percorso sia corretto
+    { 
+      loading: () => <p style={{textAlign: 'center', marginTop: '20px'}}>Caricamento mappa...</p>,
+      ssr: false // Fondamentale: Disabilita il Server-Side Rendering
+    }
+  ), []);
     return (
         <main className="px-8 sm:px-20 py-20 ">
             
@@ -40,7 +48,7 @@ const RistorantiPage = () => {
                 <div className="w-full lg:w-1/3">
                     <div className="lg:sticky lg:top-24">
                         <div className="h-[80vh] w-full rounded-2xl overflow-hidden">
-                            <TorinoRestaurantsMap />
+                            <RestaurantMap />
                         </div>
                     </div>
                 </div>
