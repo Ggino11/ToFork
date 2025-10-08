@@ -218,58 +218,99 @@ export default function Home() {
          <div className="grid grid-cols-2 sm:grid-cols-6 gap-6 items-center">
            <Link href="/ristoranti?tab=Burgers%20%26%20Fast%20Food"
                  className="flex flex-col rounded-xl overflow-hidden shadow h-[240px] w-full transition hover:scale-105">
-             <div className="flex-1 flex items-center justify-center bg-[#fff9e6]">
-               <Image src="/burger.png" alt="Burger" width={120} height={120} className="object-contain" />
+             <div className="flex-1 relative w-full h-full bg-[#fff9e6]">
+               <Image
+                   src="/burger.png"
+                   alt="Burger"
+                   fill
+                   style={{ objectFit: "cover" }}
+                   className="object-cover"
+               />
              </div>
              <div className="bg-[#171c2b] py-3 px-4 text-left">
                <span className="text-[#ffb81e] font-bold text-base">Burgers & Fast food</span>
                <div className="text-xs text-white">12 Ristoranti</div>
              </div>
            </Link>
+
            <Link href="/ristoranti?tab=Insalate"
                  className="flex flex-col rounded-xl overflow-hidden shadow h-[240px] w-full transition hover:scale-105">
-             <div className="flex-1 flex items-center justify-center bg-[#f5f5f5]">
-               <Image src="/insalata.png" alt="Insalate" width={120} height={120} className="object-contain" />
+             <div className="flex-1 relative w-full h-full bg-[#f5f5f5]">
+               <Image
+                   src="/insalata.png"
+                   alt="Insalate"
+                   fill
+                   style={{ objectFit: "cover" }}
+                   className="object-cover"
+               />
              </div>
              <div className="bg-[#262a3b] py-3 px-4 text-left">
                <span className="text-[#ffb81e] font-bold text-base">Insalate</span>
                <div className="text-xs text-white">14 Ristoranti</div>
              </div>
            </Link>
+
            <Link href="/ristoranti?tab=Pasta"
                  className="flex flex-col rounded-xl overflow-hidden shadow h-[240px] w-full transition hover:scale-105">
-             <div className="flex-1 flex items-center justify-center bg-[#f9f7f2]">
-               <Image src="/pasta.png" alt="Pasta" width={120} height={120} className="object-contain" />
+             <div className="flex-1 relative w-full h-full bg-[#f9f7f2]">
+               <Image
+                   src="/pasta.png"
+                   alt="Pasta"
+                   fill
+                   style={{ objectFit: "cover" }}
+                   className="object-cover"
+               />
              </div>
              <div className="bg-[#1a1e2d] py-3 px-4 text-left">
                <span className="text-[#ffb81e] font-bold text-base">Pasta</span>
                <div className="text-xs text-white">18 Ristoranti</div>
              </div>
            </Link>
+
            <Link href="/ristoranti?tab=Pizza"
                  className="flex flex-col rounded-xl overflow-hidden shadow h-[240px] w-full transition hover:scale-105">
-             <div className="flex-1 flex items-center justify-center bg-[#f7f7f7]">
-               <Image src="/pizza.png" alt="Pizza" width={120} height={120} className="object-contain" />
+             <div className="flex-1 relative w-full h-full bg-[#f7f7f7]">
+               <Image
+                   src="/pizza.png"
+                   alt="Pizza"
+                   fill
+                   style={{ objectFit: "cover" }}
+                   className="object-cover"
+               />
              </div>
              <div className="bg-[#181828] py-3 px-4 text-left">
                <span className="text-[#ffb81e] font-bold text-base">Pizza</span>
                <div className="text-xs text-white">22 Ristoranti</div>
              </div>
            </Link>
+
            <Link href="/ristoranti?tab=Breakfast"
                  className="flex flex-col rounded-xl overflow-hidden shadow h-[240px] w-full transition hover:scale-105">
-             <div className="flex-1 flex items-center justify-center bg-[#f8f9fa]">
-               <Image src="/breakfast.png" alt="Breakfast" width={120} height={120} className="object-contain" />
+             <div className="flex-1 relative w-full h-full bg-[#f8f9fa]">
+               <Image
+                   src="/breakfast.png"
+                   alt="Breakfast"
+                   fill
+                   style={{ objectFit: "cover" }}
+                   className="object-cover"
+               />
              </div>
              <div className="bg-[#262b32] py-3 px-4 text-left">
                <span className="text-[#ffb81e] font-bold text-base">Breakfast</span>
                <div className="text-xs text-white">4 Ristoranti</div>
              </div>
            </Link>
+
            <Link href="/ristoranti?tab=Sushi"
                  className="flex flex-col rounded-xl overflow-hidden shadow h-[240px] w-full transition hover:scale-105">
-             <div className="flex-1 flex items-center justify-center bg-[#f0f3f7]">
-               <Image src="/sushi.png" alt="Sushi" width={120} height={120} className="object-contain" />
+             <div className="flex-1 relative w-full h-full bg-[#f0f3f7]">
+               <Image
+                   src="/sushi.png"
+                   alt="Sushi"
+                   fill
+                   style={{ objectFit: "cover" }}
+                   className="object-cover"
+               />
              </div>
              <div className="bg-[#151f2e] py-3 px-4 text-left">
                <span className="text-[#ffb81e] font-bold text-base">Sushi</span>
@@ -278,6 +319,7 @@ export default function Home() {
            </Link>
          </div>
        </section>
+
 
 
        {/* Popular Restaurants */}

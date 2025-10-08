@@ -6,9 +6,9 @@ import Link from "next/link"; // Importa Link di Next.js
 
 const offerte = [
     { src: "/mollica.png", alt: "Mollica", link: "/ristoranti/mollica" },
-    { src: "/panino.png", alt: "Mr Bun", link: "/ristoranti/m-bun" },
+    { src: "/panino.png", alt: "Mc Bun", link: "/ristoranti/m-bun" },
     { src: "/da_zero.png", alt: "Da Zero", link: "/ristoranti/da-zero" },
-    { src: "/altro.png", alt: "Altro", link: "/ristoranti/prova" },
+    { src: "/sushi1.png", alt: "Sushi", link: "/ristoranti/prova" },
 ];
 
 const AUTOPLAY_MS = 5000;
@@ -76,7 +76,13 @@ export default function Carousel() {
                             href={off.link}
                             className={`${itemWidthClass} relative rounded-lg overflow-hidden flex-shrink-0 h-[250px] cursor-pointer transition hover:scale-105`}
                         >
-                            <Image src={off.src} alt={off.alt} width={400} height={250} className="object-cover" />
+                            <Image
+                                src={off.src}
+                                alt={off.alt}
+                                width={400}
+                                height={250}
+                                className="object-cover w-full h-full"
+                            />
                         </Link>
                     ))}
                 </div>
