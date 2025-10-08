@@ -7,13 +7,14 @@ import Link from "next/link";
 
 
 const POPULAR = [
-  { src: "/crostone.png", name: "Crostone", bg: "bg-[#ff9100]" },
-  { src: "/piola.png", name: "Piola 1706", bg: "bg-[#ff9100]" },
-  { src: "/mollica.png", name: "Mollica", bg: "bg-[#ff9100]" },
-  { src: "/scannabue.png", name: "Scannabue", bg: "bg-[#ff9100]" },
-  { src: "/rockburger.png", name: "Rock Burger", bg: "bg-[#ff9100]" },
-  { src: "/felicin.png", name: "Felicin alla consolata", bg: "bg-[#ff9100]" },
+  { src: "/crostone.png", name: "Crostone", slug: "crostone", bg: "bg-[#ff9100]" },
+  { src: "/piola.png", name: "Piola 1706", slug: "piola-1706", bg: "bg-[#ff9100]" },
+  { src: "/mollica.png", name: "Mollica", slug: "mollica", bg: "bg-[#ff9100]" },
+  { src: "/scannabue.png", name: "Scannabue", slug: "scannabue", bg: "bg-[#ff9100]" },
+  { src: "/rockburger.png", name: "Rock Burger", slug: "rock-burger", bg: "bg-[#ff9100]" },
+  { src: "/felicin.png", name: "Felicin alla consolata", slug: "felicin-alla-consolata", bg: "bg-[#ff9100]" },
 ];
+
 
 const FAQS = [
   {
@@ -125,32 +126,86 @@ export default function Home() {
     // </div>
      <main className="px-8 sm:px-20 py-32 space-y-16">
       {/* Hero Section */}
-      <section className="relative z-0 bg-orange-600 rounded-xl p-8 sm:p-16 flex flex-col sm:flex-row items-center gap-8 text-white">
-        <div className="sm:w-1/2">
-          <h1 className="text-3xl sm:text-5xl font-bold mb-4">
-            Prenota i migliori ristoranti di Torino
-          </h1>
-          <p className="mb-6 text-lg">
-            Scopri, prenota e gusta le migliori esperienze culinarie
-          </p>
-          <input
-            type="text"
-            placeholder="Cerca ristorante..."
-            className="w-full sm:w-auto px-4 py-2 rounded-lg text-black bg-white border border-black-300"
-          />
-        </div>
-        <div className="sm:w-1/2 flex justify-center">
-          <Image
-            src="/foto_1.png"
-            alt="Ragazza con pizza"
-            width={400}
-            height={400}
-            className="rounded-lg"
-          />
-        </div>
-      </section>
+       <section className="relative w-full flex justify-center items-center max-w-[1800px] mx-auto py-24 overflow-hidden rounded-[35px]">
+         {/* Sfondo blu principale */}
+         <div className="absolute inset-0 bg-[#080c1c]" />
 
-      {/* Offerte Esclusive */}
+         {/* Blob arancione a destra */}
+         <div
+             className="absolute right-0 top-0 w-[60%] h-full bg-[#ff9100] rounded-l-[350px]"
+             style={{ zIndex: 0 }}
+         />
+
+         {/* Contenuto principale */}
+         <div className="relative z-10 flex flex-col lg:flex-row w-full max-w-7xl items-center justify-between px-8 sm:px-16 lg:px-20">
+           {/* Testo e barra di ricerca */}
+           <div className="flex flex-col justify-center items-start text-left max-w-[550px] space-y-6 mb-10 lg:mb-0">
+             <p className="text-white text-lg font-light">
+               Scopri, prenota e ordina in anticipo i tuoi piatti
+             </p>
+             <h1 className="text-white text-5xl md:text-6xl font-extrabold leading-tight">
+               Prenota i migliori<br />ristoranti di Torino
+             </h1>
+
+             {/* Search bar */}
+             <form className="flex items-center bg-white rounded-full shadow-md px-5 py-3 w-full max-w-[420px] mt-3">
+               <span className="text-gray-400 mr-2 text-xl">🔍</span>
+               <input
+                   type="text"
+                   placeholder="tipo di cucina, nome del ristorante..."
+                   className="flex-1 bg-transparent outline-none text-gray-800 text-base font-medium"
+               />
+               <button
+                   type="submit"
+                   className="ml-3 bg-[#ff9100] text-white font-semibold rounded-full px-6 py-2 hover:bg-[#ff7a00] transition shadow"
+               >
+                 Search
+               </button>
+             </form>
+           </div>
+
+           {/* Immagine e notifiche */}
+           <div className="relative flex justify-center items-center w-full lg:w-[50%]">
+             {/* Immagine della ragazza */}
+             <Image
+                 src="/foto_1.png"
+                 alt="Ragazza con pizza"
+                 width={400}
+                 height={440}
+                 className="object-contain z-10 drop-shadow-lg"
+             />
+
+             {/* Card notifiche a destra */}
+             <div className="absolute left-[65%] top-[10%] flex flex-col gap-5 w-[360px]">
+               {/* Step 1 */}
+               <div className="relative bg-white rounded-2xl shadow-lg p-4 pl-8 border border-gray-100">
+                 <span className="absolute -left-6 top-2 text-3xl font-bold text-[#ff9100]">1</span>
+                 <p className="font-semibold text-black">Abbiamo ricevuto la tua prenotazione!</p>
+                 <p className="text-gray-500 text-sm mt-1">In attesa dell'accettazione del ristorante</p>
+               </div>
+
+               {/* Step 2 */}
+               <div className="relative bg-white rounded-2xl shadow-lg p-4 pl-8 border border-gray-100">
+                 <span className="absolute -left-6 top-2 text-3xl font-bold text-[#ff9100]">2</span>
+                 <p className="font-semibold text-black">
+                   Prenotazione accettata! <span className="text-2xl">✅</span>
+                 </p>
+                 <p className="text-gray-500 text-sm mt-1">Abbiamo prenotato il tuo posto</p>
+               </div>
+
+               {/* Step 3 */}
+               <div className="relative bg-white rounded-2xl shadow-lg p-4 pl-8 border border-gray-100">
+                 <span className="absolute -left-6 top-2 text-3xl font-bold text-[#ff9100]">3</span>
+                 <p className="font-semibold text-black">Ti aspettiamo! 🎉</p>
+                 <p className="text-gray-500 text-sm mt-1">Grazie per aver scelto ToFork</p>
+               </div>
+             </div>
+           </div>
+         </div>
+       </section>
+
+
+       {/* Offerte Esclusive */}
       <section>
         <Carousel />
       </section>
@@ -161,7 +216,7 @@ export default function Home() {
            Categorie Popolari 🍕
          </h2>
          <div className="grid grid-cols-2 sm:grid-cols-6 gap-6 items-center">
-           <Link href="/ristoranti?tab=Offerte"
+           <Link href="/ristoranti?tab=Burgers%20%26%20Fast%20Food"
                  className="flex flex-col rounded-xl overflow-hidden shadow h-[240px] w-full transition hover:scale-105">
              <div className="flex-1 flex items-center justify-center bg-[#fff9e6]">
                <Image src="/burger.png" alt="Burger" width={120} height={120} className="object-contain" />
@@ -228,11 +283,12 @@ export default function Home() {
        {/* Popular Restaurants */}
 
        <section>
-         <h2 className="text-2xl font-semibold mb-6 text-black">Popular Restaurants</h2>
+         <h2 className="text-2xl font-semibold mb-6 text-black">Ristoranti Popolari</h2>
          <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 items-center">
            {POPULAR.map((rest, idx) => (
-               <div
-                   key={idx}
+               <Link
+                   key={rest.slug}
+                   href={`/ristoranti/${rest.slug}`}
                    className="flex flex-col h-[220px] w-full rounded-xl overflow-hidden shadow group transition hover:scale-105"
                >
                  <div className="flex-1 flex items-center justify-center bg-white">
@@ -241,25 +297,30 @@ export default function Home() {
                  <div className={`py-3 text-center text-white font-bold text-base ${rest.bg}`}>
                    {rest.name}
                  </div>
-               </div>
+               </Link>
            ))}
          </div>
        </section>
 
 
-      {/* Contattaci */}
-      <section className="bg-[#172118] text-white rounded-xl p-8 flex flex-col sm:flex-row items-center gap-6">
-        <div className="sm:w-1/2">
-          <h2 className="text-2xl font-bold mb-4">CONTATTACI PER COLLABORARE</h2>
-          <p className="mb-4">Vuoi collaborare con noi? Scrivici!</p>
-          <button className="bg-orange-500 px-6 py-3 rounded-full font-semibold hover:bg-orange-600">Contattaci</button>
-        </div>
-        <div className="sm:w-1/2 flex justify-center">
-          <Image src="/contact-image.png" alt="Illustrazione contatti" width={300} height={200} />
-        </div>
-      </section>
 
-      {/* Scopri di più */}
+       {/* Contattaci */}
+       <section className="bg-[#172118] text-white rounded-xl p-8 flex flex-col sm:flex-row items-center gap-6">
+         <div className="sm:w-1/2">
+           <h2 className="text-2xl font-bold mb-4">CONTATTACI PER COLLABORARE</h2>
+           <p className="mb-4">Vuoi collaborare con noi? Scrivici!</p>
+           <a
+               href="mailto:support@tofork.com">
+               <button className="bg-orange-500 px-6 py-3 rounded-full font-semibold hover:bg-orange-600 transition-colors text-white block text-center">Contattaci</button>
+           </a>
+         </div>
+         <div className="sm:w-1/2 flex justify-center">
+           <Image src="/contact-image.png" alt="Illustrazione contatti" width={300} height={200} />
+         </div>
+       </section>
+
+
+       {/* Scopri di più */}
        <section className="bg-gray-100 rounded-xl p-6 sm:p-12">
          {/* Header e tab */}
          <div className="flex items-center justify-between mb-10">
