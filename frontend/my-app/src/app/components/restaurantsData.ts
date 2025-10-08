@@ -55,6 +55,10 @@ const restaurants = [
                 { id: "d1", title: "Coca-ina", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
                 { id: "d2", title: "Birra ", description: "Bionda 50cl", price: 5.00, imageUrl: "/img/drink2.jpg" },
             ],
+            'gggg': [
+                { id: "c1", title: "Coca-ina", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
+                { id: "c2", title: "sda ", description: "Bionda 50cl", price: 5.00, imageUrl: "/img/drink2.jpg" },
+            ],
         }
     }
 ];

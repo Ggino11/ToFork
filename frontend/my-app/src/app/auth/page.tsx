@@ -170,12 +170,12 @@ const AuthPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-300" htmlFor="firstName">Nome</label>
-                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-12 h-5 w-5 text-gray-400" /><input id="firstName" type="text" {...formRegister('firstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Mario"/></div>
+                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="firstName" type="text" {...formRegister('firstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Mario"/></div>
                 {errors.firstName && <p className="text-red-400 text-xs mt-1">{(errors.firstName as any).message}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-300" htmlFor="lastName">Cognome</label>
-                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-12 h-5 w-5 text-gray-400" /><input id="lastName" type="text" {...formRegister('lastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Rossi"/></div>
+                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="lastName" type="text" {...formRegister('lastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Rossi"/></div>
                 {errors.lastName && <p className="text-red-400 text-xs mt-1">{(errors.lastName as any).message}</p>}
               </div>
             </div>
@@ -185,23 +185,23 @@ const AuthPage = () => {
             <>
                 <div>
                     <label className="text-sm font-medium text-gray-300" htmlFor="restaurantName">Nome Ristorante</label>
-                    <div className="relative"><RestaurantIcon className="absolute left-3 top-1/2 -translate-y-12 h-5 w-5 text-gray-400" /><input id="restaurantName" type="text" {...formRegister('restaurantName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Ristorante La Brace"/></div>
+                    <div className="relative"><RestaurantIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="restaurantName" type="text" {...formRegister('restaurantName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Ristorante La Brace"/></div>
                     {errors.restaurantName && <p className="text-red-400 text-xs mt-1">{(errors.restaurantName as any).message}</p>}
                 </div>
                  <div>
                     <label className="text-sm font-medium text-gray-300" htmlFor="address">Indirizzo</label>
-                    <div className="relative"><LocationIcon className="absolute left-3 top-1/2 -translate-y-12 h-5 w-5 text-gray-400" /><input id="address" type="text" {...formRegister('address')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Via Roma, 1, Milano"/></div>
+                    <div className="relative"><LocationIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="address" type="text" {...formRegister('address')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Via Roma, 1, Milano"/></div>
                     {errors.address && <p className="text-red-400 text-xs mt-1">{(errors.address as any).message}</p>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="text-sm font-medium text-gray-300" htmlFor="adminFirstName">Nome Admin</label>
-                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-12 h-5 w-5 text-gray-400" /><input id="adminFirstName" type="text" {...formRegister('adminFirstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Luigi"/></div>
+                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="adminFirstName" type="text" {...formRegister('adminFirstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Luigi"/></div>
                         {errors.adminFirstName && <p className="text-red-400 text-xs mt-1">{(errors.adminFirstName as any).message}</p>}
                     </div>
                     <div>
                         <label className="text-sm font-medium text-gray-300" htmlFor="adminLastName">Cognome Admin</label>
-                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-12 h-5 w-5 text-gray-400" /><input id="adminLastName" type="text" {...formRegister('adminLastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Verdi"/></div>
+                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="adminLastName" type="text" {...formRegister('adminLastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Verdi"/></div>
                         {errors.adminLastName && <p className="text-red-400 text-xs mt-1">{(errors.adminLastName as any).message}</p>}
                     </div>
                 </div>
