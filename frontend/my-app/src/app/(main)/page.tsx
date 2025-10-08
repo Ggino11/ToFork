@@ -165,7 +165,7 @@ export default function Home() {
            </div>
 
            {/* Immagine e notifiche */}
-           <div className="relative flex justify-center items-center w-full lg:w-[50%]">
+           <div className="relative flex items-center w-full lg:w-[60%]">
              {/* Immagine della ragazza */}
              <Image
                  src="/foto_1.png"
@@ -176,7 +176,7 @@ export default function Home() {
              />
 
              {/* Card notifiche a destra */}
-             <div className="absolute left-[65%] top-[10%] flex flex-col gap-5 w-[360px]">
+             <div className="absolute left-[50%] top-[10%] flex flex-col gap-5 w-[360px]">
                {/* Step 1 */}
                <div className="relative bg-white rounded-2xl shadow-lg p-4 pl-8 border border-gray-100">
                  <span className="absolute -left-6 top-2 text-3xl font-bold text-[#ff9100]">1</span>
