@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import '../globals.css';
 import Tabs from "../components/Tabs";
@@ -7,37 +7,44 @@ import SearchBar from "../components/SearchBar";
 import RestaurantList from "../components/RestaurantList";
 import dynamic from "next/dynamic";
 
+// Import dinamico della mappa (fuori dal componente)
+const RestaurantMap = dynamic(() => import('../components/Map'), {
+    loading: () => <p style={{ textAlign: 'center', marginTop: '20px' }}>Caricamento mappa...</p>,
+    ssr: false
+});
+
 const RistorantiPage = () => {
-    // 🔸 Recupera il parametro "tab" dall'URL
     const searchParams = useSearchParams();
     const tabParam = searchParams.get("tab");
 
-    const [selectedTab, setSelectedTab] = useState("");
-    const [search, setSearch] = useState("");
+    const [selectedTab, setSelectedTab] = useState<string>("");
+    const [search, setSearch] = useState<string>("");
 
-    // 🔸 Aggiorna automaticamente la tab in base all'URL
+    // Gestione parametro ?tab= dalla URL
     useEffect(() => {
-        if (tabParam) {
-            setSelectedTab(tabParam);
-        }
+        if (tabParam) setSelectedTab(tabParam);
     }, [tabParam]);
 
-    // 🔸 Mappa caricata in modo dinamico (come nel tuo codice)
-    const RestaurantMap = useMemo(() => dynamic(
-        () => import('../components/Map'),
-        {
-            loading: () => <p style={{ textAlign: 'center', marginTop: '20px' }}>Caricamento mappa...</p>,
-            ssr: false
-        }
-    ), []);
+    // Reset se clicchi fuori dalla barra tab
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            const tabsContainer = document.querySelector(".tabs-container");
+            if (tabsContainer && !tabsContainer.contains(e.target as Node)) {
+                setSelectedTab("");
+            }
+        };
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, []);
 
     return (
-        <main className="px-8 sm:px-20 py-20 ">
-
+        <main className="px-8 sm:px-20 py-20">
+            {/* --- Header --- */}
             <section
                 className="relative h-[420px] rounded-lg overflow-hidden my-8 bg-cover bg-center flex items-center justify-center px-4"
                 style={{
-                    backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.25)), url('/divImg.png')"
+                    backgroundImage:
+                        "linear-gradient(rgba(255,255,255,0.25), rgba(255,255,255,0.25)), url('/divImg.png')"
                 }}
             >
                 <div className="relative">
@@ -47,11 +54,13 @@ const RistorantiPage = () => {
                 </div>
             </section>
 
-            <div className="my-6 p-3 bg-orange-500 rounded-xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* --- Tabs + Search --- */}
+            <div className="my-6 p-3 bg-orange-500 rounded-xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 tabs-container">
                 <Tabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
                 <SearchBar value={search} onChange={setSearch} />
             </div>
 
+            {/* --- Lista + Mappa --- */}
             <div className="flex flex-col lg:flex-row gap-8 mt-8">
                 <div className="w-full lg:w-2/3 flex flex-col gap-6">
                     <RestaurantList search={search} selectedTab={selectedTab} />
