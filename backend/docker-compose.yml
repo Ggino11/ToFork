@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # PostgreSQL per User Service
+  user-service-db:
+    image: postgres:15
+    container_name: user-service-db
+    restart: always
+    environment:
+      POSTGRES_DB: userservice
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - user_data:/var/lib/postgresql/data
+
+  # pgAdmin per gestione database
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "30001:80"
+    depends_on:
+      - user-service-db
+
+volumes:
+  user_data:

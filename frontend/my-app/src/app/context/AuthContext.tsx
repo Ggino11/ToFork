@@ -66,9 +66,11 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
+
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
+  registerRestaurant: (data: RestaurantRegisterData) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
 }
@@ -78,7 +80,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
   // Check for existing token on app start
   useEffect(() => {
@@ -251,6 +253,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // registrazione ristorante
+  const registerRestaurant = async (data: RestaurantRegisterData): Promise<boolean> => {
+  dispatch({ type: 'AUTH_START' });
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register-restaurant`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (response.ok && responseData.success) {
+      dispatch({ type: 'CLEAR_ERROR' });
+      return true;
+    } else {
+      dispatch({ 
+        type: 'AUTH_ERROR', 
+        payload: responseData.message || 'Errore durante la registrazione del ristorante' 
+      });
+      return false;
+    }
+  } catch (error) {
+    console.error('Restaurant registration error:', error);
+    dispatch({ 
+      type: 'AUTH_ERROR', 
+      payload: 'Errore di connessione. Riprova più tardi.' 
+    });
+    return false;
+  }
+};
+
+// logout
   const logout = async () => {
     try {
       const token = localStorage.getItem('authToken');

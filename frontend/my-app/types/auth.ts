@@ -27,6 +27,14 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface RestaurantRegisterRequest {
+  restaurantName: string;
+  address: string;
+  adminFirstName: string;
+  adminLastName: string;
+  email: string;
+  password: string;
+}
 
 export interface ApiResponse<T = any> {
   success: boolean;
