@@ -1,21 +1,88 @@
-package com.tofork.order.service;
+package com.tofork.orderservice.service;
 
-import com.tofork.order.model.OrderModel;
-import com.tofork.order.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.tofork.orderservice.dto.CreateOrderRequest;
+import com.tofork.orderservice.dto.UpdateOrderStatusRequest;
+import com.tofork.orderservice.model.Order;
+import com.tofork.orderservice.model.OrderStatus;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
-@Service
-public class OrderService {
-    @Autowired
-    private OrderRepository repository;
+public interface OrderService {
 
-    public OrderModel createOrder(OrderModel order) {
-        return repository.save(order);
-    }
+    /**
+     * Crea un nuovo ordine
+     */
+    Order createOrder(CreateOrderRequest request) throws Exception;
 
-    public List<OrderModel> getOrdersByUser(Long userId) {
-        return repository.findByUserId(userId);
-    }
+    /**
+     * Trova ordine per ID
+     */
+    Order findOrderById(Long orderId) throws Exception;
+
+    /**
+     * Aggiorna stato ordine
+     */
+    Order updateOrderStatus(Long orderId, UpdateOrderStatusRequest request, String userRole) throws Exception;
+
+    /**
+     * Cancella ordine (solo se in stato PENDING o CONFIRMED)
+     */
+    void cancelOrder(Long orderId, Long userId) throws Exception;
+
+    /**
+     * Ottieni tutti gli ordini di un utente
+     */
+    List<Order> getUserOrders(Long userId);
+
+    /**
+     * Ottieni ordini di un utente filtrati per stato
+     */
+    List<Order> getUserOrdersByStatus(Long userId, OrderStatus status);
+
+    /**
+     * Ottieni tutti gli ordini di un ristorante
+     */
+    List<Order> getRestaurantOrders(Long restaurantId);
+
+    /**
+     * Ottieni ordini di un ristorante filtrati per stato
+     */
+    List<Order> getRestaurantOrdersByStatus(Long restaurantId, OrderStatus status);
+
+    /**
+     * Ottieni ordini di un ristorante per range di date
+     */
+    List<Order> getRestaurantOrdersByDateRange(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate);
+
+    /**
+     * Verifica se l'utente può accedere all'ordine
+     */
+    boolean canUserAccessOrder(Long orderId, Long userId, String userRole) throws Exception;
+
+    /**
+     * Verifica se il ristorante può accedere all'ordine
+     */
+    boolean canRestaurantAccessOrder(Long orderId, Long restaurantId) throws Exception;
+
+    /**
+     * Calcola statistiche per un ristorante
+     */
+    Map<String, Object> getRestaurantStats(Long restaurantId);
+
+    /**
+     * Calcola revenue totale per un ristorante
+     */
+    Double calculateRestaurantRevenue(Long restaurantId);
+
+    /**
+     * Calcola revenue per un ristorante in un range di date
+     */
+    Double calculateRestaurantRevenueByDateRange(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate);
+
+    /**
+     * Ottieni conteggio ordini per stato per un ristorante
+     */
+    Map<OrderStatus, Long> getOrderCountsByStatus(Long restaurantId);
 }
