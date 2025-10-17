@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +26,6 @@ public class User {
     @Column(name = "google_id")
     private String googleId;
 
-    @Column(name = "profile_image_url")
-    private String profileImageUrl;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -37,11 +34,11 @@ public class User {
     @Column(nullable = false)
     private AuthProvider provider;
 
-    @Column(name = "email_verified", nullable = false)
-    private Boolean emailVerified = false;
+//    @Column(name = "email_verified", nullable = false)
+//    private Boolean emailVerified = false;
 
-    @Column(name = "active", nullable = false)
-    private Boolean active = true;
+//    @Column(name = "active", nullable = false)
+//    private Boolean active = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

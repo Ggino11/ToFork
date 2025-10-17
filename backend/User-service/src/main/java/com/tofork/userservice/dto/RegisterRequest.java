@@ -14,6 +14,7 @@ public class RegisterRequest {
     private String address;
     private String adminFirstName;
     private String adminLastName;
+    private String userType;
 
     public RegisterRequest() {}
 
@@ -70,4 +71,7 @@ public class RegisterRequest {
 
     public String getAdminLastName() { return adminLastName; }
     public void setAdminLastName(String adminLastName) { this.adminLastName = adminLastName; }
+
+    public String getUserType() { return userType; }
+    public void setUserType(String userType) { this.userType = userType; }
 }

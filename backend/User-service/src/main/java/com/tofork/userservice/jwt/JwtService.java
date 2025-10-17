@@ -1,4 +1,4 @@
-package com.tofork.userservice.auth.jwt;
+package com.tofork.userservice.jwt;
 
 import com.tofork.userservice.model.User;
 import io.jsonwebtoken.*;
@@ -68,5 +68,36 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();
+    }
+
+    /**
+     * Estrae l'ID utente dal token
+     */
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Object idClaim = claims.get("id");
+        if (idClaim instanceof Integer) {
+            return ((Integer) idClaim).longValue();
+        } else if (idClaim instanceof Long) {
+            return (Long) idClaim;
+        }
+        return null;
+    }
+
+    /**
+     * Estrae il ruolo dal token
+     */
+    public String getRoleFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("role", String.class);
     }
 }

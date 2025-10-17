@@ -72,4 +72,8 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Object>> logout() {
         return ResponseEntity.ok(ApiResponse.success("Logout effettuato", null));
     }
+    @GetMapping("/api/v1/test-protected")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> testProtected() {
+        return ResponseEntity.ok(ApiResponse.success("test successful", null));
+    }
 }

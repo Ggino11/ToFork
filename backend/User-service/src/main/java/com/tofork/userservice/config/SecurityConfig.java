@@ -1,60 +1,49 @@
 package com.tofork.userservice.config;
 
-import com.tofork.userservice.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import com.tofork.userservice.auth.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
-/**
- * SecurityConfig - Configurazione Spring Security + OAuth2
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private UserService userService;
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
-    @Value("${app.frontend.url}")
-    private String frontendUrl;
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Disabilita CSRF per API REST
-                .csrf(csrf -> csrf.disable())
-
-                // Configura CORS
+                .csrf(AbstractHttpConfigurer::disable) //
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Autorizzazioni
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll() // da cambaire con postgresql
+                        .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().authenticated()
                 )
-
-                // Configura OAuth2 con handler inline semplificato
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2SuccessHandler())
-                );
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .headers(headers -> headers.frameOptions(
+                        org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig::sameOrigin
+                ));
 
         return http.build();
     }
@@ -67,44 +56,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:8080"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*")); // Correzione: Uso di List.of
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    /**
-     * Handler OAuth2 semplificato inline
-     */
-    private AuthenticationSuccessHandler oAuth2SuccessHandler() {
-        return (HttpServletRequest request, HttpServletResponse response,
-                org.springframework.security.core.Authentication authentication) -> {
-
-            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-
-            try {
-                Map<String, Object> userData = userService.processOAuthUser(oauth2User);
-
-                String fullName = userData.get("firstName") + " " + userData.get("lastName");
-
-                String redirectUrl = UriComponentsBuilder
-                        .fromHttpUrl(frontendUrl + "/auth")
-                        .queryParam("token", userData.get("token"))
-                        .queryParam("userId", userData.get("id"))
-                        .queryParam("email", userData.get("email"))
-                        .queryParam("name", fullName.trim())
-                        .queryParam("role", userData.get("role"))
-                        .build().toUriString();
-
-                response.sendRedirect(redirectUrl);
-
-            } catch (Exception e) {
-                response.sendRedirect(frontendUrl + "/auth?error=oauth_failed");
-            }
-        };
     }
 }
