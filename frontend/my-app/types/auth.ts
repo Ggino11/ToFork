@@ -3,10 +3,18 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  profileImageUrl?: string;
-  role: 'CUSTOMER' | 'RESTAURANT_OWNER' | 'ADMIN';
+  role: 'CUSTOMER' | 'RESTAURANT_OWNER';
   provider: 'LOCAL' | 'GOOGLE'; // forse si puo togliere dipende se devidiamo di salvarlo nel db o no
   emailVerified: boolean;
+}
+
+export interface AuthContextType {
+    user: User | null;
+    token: string | null;
+    login: (token: string, userData: User) => void;
+    logout: () => void;
+    isAuthenticated: boolean;
+    isLoading: boolean;
 }
 
 export interface AuthResponse{
@@ -49,14 +57,12 @@ export interface ErrorResponse {
   errors?: Record<string, string>;
 }
 
-// Enum per i ruoli (opzionale, ma utile)
+// Enum per i ruoli 
 export enum UserRole {
   CUSTOMER = 'CUSTOMER',
-  RESTAURANT_OWNER = 'RESTAURANT_OWNER',
-  ADMIN = 'ADMIN'
+  RESTAURANT_OWNER = 'RESTAURANT_OWNER'
 }
 
-// di nuovo dipende se vogliamo saperlo o meno ma si puo anche fare a meno 
 export enum AuthProvider {
   LOCAL = 'LOCAL',
   GOOGLE = 'GOOGLE'

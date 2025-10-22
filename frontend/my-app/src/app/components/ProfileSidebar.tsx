@@ -2,6 +2,7 @@
 
 import { FaUser, FaCreditCard, FaReceipt, FaSignOutAlt } from 'react-icons/fa';
 import Link from 'next/link';
+import { useAuth } from '../context/AuthContext';
 
 // Definisci i tipi per le props
 type ActiveView = 'profile' | 'payments' | 'orders';
@@ -18,11 +19,13 @@ const navItems = [
 ];
 
 export default function ProfileSidebar({ activeView, setActiveView }: ProfileSidebarProps) {
-    
+  
+  const { logout } = useAuth();
   const handleLogout = () => {
-    // Qui implementerai la logica di logout (es. pulire il token, reindirizzare)
+   
+    logout();
     console.log("Logout clicked");
-    // Esempio: window.location.href = '/auth';
+   
   };
 
   return (

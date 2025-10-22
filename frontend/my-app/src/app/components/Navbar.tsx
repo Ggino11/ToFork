@@ -7,6 +7,7 @@ import Image from "next/image";
 import { FaUserCircle } from "react-icons/fa";
 import ProfileAvatar from "./ProfileAvatar"; // 
 import {usePathname} from "next/navigation";
+import { useAuth } from '../context/AuthContext';
 
 export interface User {
   name: string;
@@ -15,12 +16,14 @@ export interface User {
   // other user properties
 }
 
-interface NavbarProps {
-  user: User | null;
-}
+// interface NavbarProps {
+//   user: User | null;
+// }
 
-export default function Navbar({ user }: NavbarProps) {
+
+export default function Navbar() {
   const pathname = usePathname();
+  const { isAuthenticated, user } = useAuth();
   return (
     <nav className=" fixed w-full z-50 bg-white shadow-md px-6 py-1 flex items-center">
       {/* Logo */}
@@ -48,7 +51,7 @@ export default function Navbar({ user }: NavbarProps) {
         </Link>
       </div>
         <div className="flex space-x-4 ml-8">
-          {user ? (
+          {isAuthenticated && user ? (
             <Link
               href="/profile"
               className="flex items-center space-x-2 text-black"

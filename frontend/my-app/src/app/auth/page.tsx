@@ -4,11 +4,12 @@ import { useState, FC, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import Image from 'next/image'; 
+import Image from 'next/image';
 import Link from 'next/link';
-import { useAuth } from '../context/AuthContext'; // 1. Importiamo il context
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
-// --- Icone SVG ---
+// Icone SVG  
 const UserIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -43,45 +44,35 @@ const LocationIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => (
     </svg>
 );
 
-// --- Schemi di validazione Zod ---
+//  Schemi di validazione Zod 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Inserisci un'email valida" }),
+  email: z.email({ message: "Inserisci un'email valida" }),
   password: z.string().min(1, { message: "La password è richiesta" }),
 });
-
 const signupUserSchema = z.object({
   firstName: z.string().min(2, { message: "Il nome deve contenere almeno 2 caratteri" }),
   lastName: z.string().min(2, { message: "Il cognome deve contenere almeno 2 caratteri" }),
-  email: z.string().email({ message: "Inserisci un'email valida" }),
+  email: z.email({ message: "Inserisci un'email valida" }),
   password: z.string().min(8, { message: "La password deve contenere almeno 8 caratteri" }),
 });
-
 const signupRestaurantSchema = z.object({
     restaurantName: z.string().min(3, { message: "Il nome del ristorante deve avere almeno 3 caratteri" }),
     address: z.string().min(5, { message: "L'indirizzo deve avere almeno 5 caratteri" }),
     adminFirstName: z.string().min(2, { message: "Il nome deve contenere almeno 2 caratteri" }),
     adminLastName: z.string().min(2, { message: "Il cognome deve contenere almeno 2 caratteri" }),
-    email: z.string().email({ message: "Inserisci un'email valida" }),
+    email: z.email({ message: "Inserisci un'email valida" }),
     password: z.string().min(8, { message: "La password deve contenere almeno 8 caratteri" }),
 });
 
-// --- Tipi dei Form ---
-type LoginFormValues = z.infer<typeof loginSchema>;
-type SignupUserFormValues = z.infer<typeof signupUserSchema>;
-type SignupRestaurantFormValues = z.infer<typeof signupRestaurantSchema>;
-type FormValues = LoginFormValues | SignupUserFormValues | SignupRestaurantFormValues;
+type FormValues = z.infer<typeof loginSchema> & z.infer<typeof signupUserSchema> & z.infer<typeof signupRestaurantSchema>;
 
-// --- Componente Principale ---
+
 const AuthPage = () => {
   const [formMode, setFormMode] = useState<'login' | 'signupUser' | 'signupRestaurant'>('login');
-  
-  // 2. Usiamo stato e funzioni dal nostro AuthContext
-  const { login, register, registerRestaurant, isLoading, error, clearError } = useAuth();
-  
-  // Stato locale solo per i messaggi di successo
-  const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const { login, isLoading } = useAuth(); // Prendiamo isLoading dal context
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null); // stato per gli errori
 
-  // Determina lo schema di validazione corrente
   const currentSchema = useMemo(() => {
     switch (formMode) {
       case 'login': return loginSchema;
@@ -90,51 +81,58 @@ const AuthPage = () => {
     }
   }, [formMode]);
 
-  const { register: formRegister, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
     resolver: zodResolver(currentSchema),
   });
 
-  // Funzione per cambiare il tipo di form
   const switchFormMode = (mode: 'login' | 'signupUser' | 'signupRestaurant') => {
     setFormMode(mode);
     reset();
-    clearError();
-    setApiSuccess(null);
+    setServerError(null); // Puliamo gli errori quando cambiamo form
   };
-
-  // 3. La funzione onSubmit ora usa le funzioni del context
+  
+  // invia i dati al backend
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setApiSuccess(null);
-    clearError();
-    let success = false;
+    setServerError(null);
+    let endpoint = '';
+    if (formMode === 'login') endpoint = 'http://localhost:8081/auth/login';
+    if (formMode === 'signupUser') endpoint = 'http://localhost:8081/auth/register';
+    if (formMode === 'signupRestaurant') endpoint = 'http://localhost:8081/api/auth/register-restaurant';
 
-    switch (formMode) {
-        case 'login':
-            await login(data.email as string, data.password as string);
-            // Il redirect dopo il login è gestito automaticamente dal context
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        
+        // Gestiamo il caso in cui la risposta non sia JSON
+        const responseText = await response.text();
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (e) {
+            setServerError("Errore inaspettato dal server. Controlla la console del backend.");
+            console.error("Risposta non JSON:", responseText);
             return;
-        case 'signupUser':
-            success = await register(data as SignupUserFormValues);
-            if (success) {
-                setApiSuccess('Registrazione completata! Ora puoi effettuare il login.');
-                switchFormMode('login'); 
-            }
-            break;
-        case 'signupRestaurant':
-            success = await registerRestaurant(data as SignupRestaurantFormValues);
-            if (success) {
-                setApiSuccess('Registrazione ristorante completata! Ora puoi effettuare il login.');
-                switchFormMode('login');
-            }
-            break;
+        }
+
+        if (result.success) {
+            login(result.data.token, result.data.user);
+            router.push('/');
+        } else {
+            setServerError(result.message || 'Si è verificato un errore.');
+        }
+    } catch (error) {
+        setServerError('Errore di connessione. Controlla che il backend sia attivo.');
     }
   };
   
   const handleGoogleSignIn = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/oauth2/authorization/google`;
+    //Google Sign-In 
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'}/oauth2/authorization/google`;
   };
   
-  // Contenuto dinamico per titoli e pulsanti
   const { title, subtitle, buttonText } = useMemo(() => {
     switch (formMode) {
       case 'login':
@@ -147,10 +145,11 @@ const AuthPage = () => {
   }, [formMode]);
 
   return (
+    
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80')" }}>
       <div className="w-full max-w-md bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-lg p-8 space-y-6">
-        <div className="hidden md:flex items-center justify-center gap-4 mb-2">
-            <button type="button" aria-label="Torna indietro" onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-700 transition">
+        <div className="flex items-center justify-center gap-4 mb-2">
+            <button type="button" aria-label="Torna indietro" onClick={() => router.back()} className="p-2 rounded-full hover:bg-gray-700 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
             <Link href="/"><Image src="/logo.svg" width={200} height={60} alt="ToFork logo" /></Link>
@@ -161,8 +160,8 @@ const AuthPage = () => {
           <p className="text-gray-400 mt-2">{subtitle}</p>
         </div>
 
-        {error && <div className="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg text-center">{error}</div>}
-        {apiSuccess && <div className="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded-lg text-center">{apiSuccess}</div>}
+        {/* Mostra l'errore del server */}
+        {serverError && <div className="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg text-center">{serverError}</div>}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           
@@ -170,13 +169,13 @@ const AuthPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-300" htmlFor="firstName">Nome</label>
-                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="firstName" type="text" {...formRegister('firstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Mario"/></div>
-                {errors.firstName && <p className="text-red-400 text-xs mt-1">{(errors.firstName as any).message}</p>}
+                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="firstName" type="text" {...register('firstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Mario"/></div>
+                {errors.firstName && <p className="text-red-400 text-xs mt-1">{errors.firstName.message}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-300" htmlFor="lastName">Cognome</label>
-                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="lastName" type="text" {...formRegister('lastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Rossi"/></div>
-                {errors.lastName && <p className="text-red-400 text-xs mt-1">{(errors.lastName as any).message}</p>}
+                <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="lastName" type="text" {...register('lastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Rossi"/></div>
+                {errors.lastName && <p className="text-red-400 text-xs mt-1">{errors.lastName.message}</p>}
               </div>
             </div>
           )}
@@ -185,24 +184,24 @@ const AuthPage = () => {
             <>
                 <div>
                     <label className="text-sm font-medium text-gray-300" htmlFor="restaurantName">Nome Ristorante</label>
-                    <div className="relative"><RestaurantIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="restaurantName" type="text" {...formRegister('restaurantName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Ristorante La Brace"/></div>
-                    {errors.restaurantName && <p className="text-red-400 text-xs mt-1">{(errors.restaurantName as any).message}</p>}
+                    <div className="relative"><RestaurantIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="restaurantName" type="text" {...register('restaurantName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Ristorante La Brace"/></div>
+                    {errors.restaurantName && <p className="text-red-400 text-xs mt-1">{errors.restaurantName.message}</p>}
                 </div>
                  <div>
                     <label className="text-sm font-medium text-gray-300" htmlFor="address">Indirizzo</label>
-                    <div className="relative"><LocationIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="address" type="text" {...formRegister('address')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Via Roma, 1, Milano"/></div>
-                    {errors.address && <p className="text-red-400 text-xs mt-1">{(errors.address as any).message}</p>}
+                    <div className="relative"><LocationIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="address" type="text" {...register('address')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Via Roma, 1, Milano"/></div>
+                    {errors.address && <p className="text-red-400 text-xs mt-1">{errors.address.message}</p>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="text-sm font-medium text-gray-300" htmlFor="adminFirstName">Nome Admin</label>
-                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="adminFirstName" type="text" {...formRegister('adminFirstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Luigi"/></div>
-                        {errors.adminFirstName && <p className="text-red-400 text-xs mt-1">{(errors.adminFirstName as any).message}</p>}
+                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="adminFirstName" type="text" {...register('adminFirstName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Luigi"/></div>
+                        {errors.adminFirstName && <p className="text-red-400 text-xs mt-1">{errors.adminFirstName.message}</p>}
                     </div>
                     <div>
                         <label className="text-sm font-medium text-gray-300" htmlFor="adminLastName">Cognome Admin</label>
-                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="adminLastName" type="text" {...formRegister('adminLastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Verdi"/></div>
-                        {errors.adminLastName && <p className="text-red-400 text-xs mt-1">{(errors.adminLastName as any).message}</p>}
+                        <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="adminLastName" type="text" {...register('adminLastName')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="Verdi"/></div>
+                        {errors.adminLastName && <p className="text-red-400 text-xs mt-1">{errors.adminLastName.message}</p>}
                     </div>
                 </div>
             </>
@@ -210,13 +209,13 @@ const AuthPage = () => {
 
           <div>
             <label className="text-sm font-medium text-gray-300" htmlFor="email">Email</label>
-            <div className="relative"><EmailIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="email" type="email" {...formRegister('email')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="nome@dominio.com"/></div>
+            <div className="relative"><EmailIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="email" type="email" {...register('email')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="nome@dominio.com"/></div>
             {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
             <label className="text-sm font-medium text-gray-300" htmlFor="password">Password</label>
-            <div className="relative"><LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="password" type="password" {...formRegister('password')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="••••••••"/></div>
+            <div className="relative"><LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" /><input id="password" type="password" {...register('password')} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10" placeholder="••••••••"/></div>
             {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
           </div>
 
@@ -247,4 +246,3 @@ const AuthPage = () => {
 };
 
 export default AuthPage;
-
