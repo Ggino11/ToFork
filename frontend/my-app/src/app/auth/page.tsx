@@ -128,11 +128,9 @@ const AuthPage = () => {
     }
   };
   
-  const handleGoogleSignIn = () => {
-    //Google Sign-In 
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'}/oauth2/authorization/google`;
-  };
-  
+const handleGoogleSignIn = () => {
+  window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'}/oauth2/authorization/google`;
+};
   const { title, subtitle, buttonText } = useMemo(() => {
     switch (formMode) {
       case 'login':

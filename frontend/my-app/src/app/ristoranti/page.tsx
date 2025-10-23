@@ -7,7 +7,7 @@ import SearchBar from "../components/SearchBar";
 import RestaurantList from "../components/RestaurantList";
 import dynamic from "next/dynamic";
 
-// ✅ Import dinamico sicuro
+// Import dinamico sicuro
 const RestaurantMap = dynamic(() => import('../components/Map'), {
     loading: () => <p style={{ textAlign: 'center', marginTop: '20px' }}>Caricamento mappa...</p>,
     ssr: false
@@ -16,14 +16,14 @@ const RestaurantMap = dynamic(() => import('../components/Map'), {
 const RistorantiPage = () => {
     const searchParams = useSearchParams();
 
-    // ✅ Prendiamo il valore del parametro "tab" e verifichiamo che sia una stringa valida
+    // Prendiamo il valore del parametro "tab" e verifichiamo che sia una stringa valida
     let tabParam = searchParams.get("tab");
     if (tabParam && typeof tabParam !== "string") tabParam = "";
 
     const [selectedTab, setSelectedTab] = useState<string>("");
     const [search, setSearch] = useState<string>("");
 
-    // ✅ Aggiornamento sicuro dello stato
+    // Aggiornamento sicuro dello stato
     useEffect(() => {
         if (tabParam && /^[\w\s&]+$/.test(tabParam)) {
             // Accetta solo lettere, spazi, & (es: "Burgers & Fast Food")
@@ -33,7 +33,7 @@ const RistorantiPage = () => {
         }
     }, [tabParam]);
 
-    // ✅ Reset se clicchi fuori dalla barra tab
+    // Reset se clicchi fuori dalla barra tab
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             const tabsContainer = document.querySelector(".tabs-container");
