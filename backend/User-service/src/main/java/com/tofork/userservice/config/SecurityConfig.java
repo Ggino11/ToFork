@@ -1,28 +1,42 @@
 package com.tofork.userservice.config;
 
 import com.tofork.userservice.auth.JwtAuthenticationFilter;
+import com.tofork.userservice.service.OAuth2Service;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+
+    @Autowired
+    private OAuth2Service oauth2Service;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -31,12 +45,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) //
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll() // da cambaire con postgresql
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -45,7 +59,9 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(
                         org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig::sameOrigin
                 ))
-                .oauth2Login(Customizer.withDefaults());
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2SuccessHandler())
+                );
 
         return http.build();
     }
@@ -65,5 +81,41 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private AuthenticationSuccessHandler oAuth2SuccessHandler() {
+        return (HttpServletRequest request, HttpServletResponse response,
+                org.springframework.security.core.Authentication authentication) -> {
+
+            try {
+                System.out.println("🟢 === OAuth2 Success Handler chiamato ===");
+
+                OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+                System.out.println("🟢 OAuth2User ottenuto: " + oauth2User.getAttributes());
+
+                Map<String, Object> userData = oauth2Service.processOAuthUser(oauth2User);
+                System.out.println("🟢 UserData processato: " + userData);
+
+                String fullName = userData.get("firstName") + " " + userData.get("lastName");
+
+                String redirectUrl = UriComponentsBuilder
+                        .fromHttpUrl(frontendUrl + "/auth")
+                        .queryParam("token", userData.get("token"))
+                        .queryParam("userId", userData.get("id"))
+                        .queryParam("email", userData.get("email"))
+                        .queryParam("name", fullName.trim())
+                        .queryParam("role", userData.get("role"))
+                        .build().toUriString();
+
+                System.out.println("🟢 Redirect URL: " + redirectUrl);
+                response.sendRedirect(redirectUrl);
+
+            } catch (Exception e) {
+                System.err.println("❌ ERRORE OAuth2 Success Handler:");
+                System.err.println("❌ Messaggio: " + e.getMessage());
+                e.printStackTrace();
+                response.sendRedirect(frontendUrl + "/auth?error=oauth_failed&detail=" + e.getMessage());
+            }
+        };
     }
 }

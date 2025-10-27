@@ -1,104 +1,113 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, ReactNode, useState } from 'react';
-import { User } from '../../../types/auth';
+import { createContext, useContext, useEffect, ReactNode, useState } from "react";
+import { User } from "../../../../../types/auth";
 
-// interface AuthState {
-//   user: User | null;
-//   token: string | null;
-//   isAuthenticated: boolean;
-//   isLoading: boolean;
-//   error: string | null;
-// }
 interface AuthContextType {
     user: User | null;
     token: string | null;
     login: (token: string, userData: User) => void;
     logout: () => void;
     isAuthenticated: boolean;
-    isLoading: boolean; 
+    isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined); 
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true); 
+    const [isLoading, setIsLoading] = useState(true);
 
+    // ⭐ Inizializzazione: carica da localStorage al mount
     useEffect(() => {
-        // Al primo caricamento, controlla se c'è un token nel localStorage
-        try {
-            const storedToken = localStorage.getItem('token');
-            const storedUser = localStorage.getItem('user');
+        const initAuth = () => {
+            try {
+                const storedToken = localStorage.getItem("token");
+                const storedUser = localStorage.getItem("user");
 
-            if (storedToken && storedUser) {
-                // Se trovai dati, validiamo il token con il backend
-                validateToken(storedToken, JSON.parse(storedUser));
-            } else {
-                setIsLoading(false); // Nessun dato, smettiamo di caricare
+                console.log('🔵 AuthContext inizializzazione:', {
+                    hasToken: !!storedToken,
+                    hasUser: !!storedUser
+                });
+
+                if (storedToken && storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+                    console.log('✅ Utente recuperato da localStorage:', parsedUser);
+                    setToken(storedToken);
+                    setUser(parsedUser);
+                }
+            } catch (error) {
+                console.error("❌ Errore durante inizializzazione auth:", error);
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error("Failed to parse auth data from storage", error);
-            logout(); 
-            setIsLoading(false);
-        }
+        };
+
+        initAuth();
     }, []);
 
-    const validateToken = async (tokenToValidate: string, userToSet: User) => {
-        try {
-    
-            const response = await fetch('http://localhost:8081/auth/validate', {
-                headers: {
-                    'Authorization': `Bearer ${tokenToValidate}`
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.valid) {
-                console.log("Token validation successful:", data.user);
-                login(tokenToValidate, data.user);
-            } else {
-                console.log("Token validation failed, logging out.");
-                logout();
-            }
-        } catch (error) {
-            console.error('Error validating token:', error);
-            logout();
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-
+    // ⭐ Funzione login
     const login = (newToken: string, userData: User) => {
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('user', JSON.stringify(userData));
+        console.log('🟢 Login chiamato con:', { token: newToken, user: userData });
+
+        // Salva in localStorage
+        localStorage.setItem("token", newToken);
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        // Aggiorna stato
         setToken(newToken);
         setUser(userData);
+
+        console.log('✅ Login completato, stato aggiornato');
     };
 
+    // ⭐ Funzione logout
     const logout = () => {
-        // Chiamata all'endpoint di logout del backend 
-        fetch('http://localhost:8081/auth/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        }).catch(err => console.error("Logout API call failed:", err));
+        console.log('🔴 Logout chiamato');
 
-        // Pulizia lato client 
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        // Chiamata API logout (opzionale)
+        if (token) {
+            fetch("http://localhost:8081/auth/logout", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }).catch(err => console.error("Errore logout API:", err));
+        }
+
+        // Pulisci tutto
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setToken(null);
         setUser(null);
     };
 
-    const isAuthenticated = !!token;
+    const isAuthenticated = !!token && !!user;
+
+    // ⭐ Log ogni volta che lo stato cambia (debug)
+    useEffect(() => {
+        console.log('🔵 AuthContext stato aggiornato:', {
+            isAuthenticated,
+            hasToken: !!token,
+            hasUser: !!user,
+            user: user
+        });
+    }, [isAuthenticated, token, user]);
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, isLoading }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                token,
+                login,
+                logout,
+                isAuthenticated,
+                isLoading,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
@@ -107,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
 };
