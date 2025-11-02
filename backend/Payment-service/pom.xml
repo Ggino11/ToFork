@@ -19,7 +19,7 @@
     <description>Payment-service per ToFork - Gestione pagamenti con Stripe</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>

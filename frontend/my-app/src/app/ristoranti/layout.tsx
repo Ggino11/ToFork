@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <>
-        <Navbar user={null} />
+        <Navbar />
         {children}
         {/* <FoodCard imageUrl='/pizza.png' title='ciao' description='cioao' price={15} />
         <CalendarBooking/> */}

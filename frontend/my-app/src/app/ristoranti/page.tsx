@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import '../globals.css';
-import Tabs from "../components/Tabs";
+import Tabs from "../components/tabs";
 import SearchBar from "../components/SearchBar";
 import RestaurantList from "../components/RestaurantList";
 import dynamic from "next/dynamic";
@@ -13,7 +13,8 @@ const RestaurantMap = dynamic(() => import('../components/Map'), {
     ssr: false
 });
 
-const RistorantiPage = () => {
+// Componente interno che usa useSearchParams
+function RistorantiContent() {
     const searchParams = useSearchParams();
 
     // Prendiamo il valore del parametro "tab" e verifichiamo che sia una stringa valida
@@ -84,6 +85,17 @@ const RistorantiPage = () => {
             </div>
         </main>
     );
-};
+}
 
-export default RistorantiPage;
+// Componente principale con Suspense
+export default function RistorantiPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-xl">Caricamento...</p>
+            </div>
+        }>
+            <RistorantiContent />
+        </Suspense>
+    );
+}

@@ -1,6 +1,7 @@
 
 
 services:
+  # Database PostgreSQL
   postgres:
     image: postgres:15-alpine
     container_name: tofork-postgres
@@ -12,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infra/init-db.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - tofork-network
     healthcheck:
@@ -20,6 +22,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # Message Broker RabbitMQ
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: tofork-rabbitmq
@@ -32,13 +35,11 @@ services:
     networks:
       - tofork-network
 
-  # User Service - usa Dockerfile generico con argomento
+  # User Service
   user-service:
     build:
-      context: ./backend
+      context: ./backend/User-service
       dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: User-service
     container_name: tofork-user-service
     ports:
       - "8081:8081"
@@ -47,6 +48,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       JWT_SECRET: mySecretKeyWhichIsLongEnoughForHS256
@@ -58,16 +60,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     networks:
       - tofork-network
 
   # Order Service
   order-service:
     build:
-      context: ./backend
+      context: ./backend/Order-service
       dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: Order-service
     container_name: tofork-order-service
     ports:
       - "8082:8082"
@@ -76,24 +78,26 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       JWT_SECRET: mySecretKeyWhichIsLongEnoughForHS256
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: admin
       SPRING_RABBITMQ_PASSWORD: admin
+      USER_SERVICE_URL: http://user-service:8081
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     networks:
       - tofork-network
 
   # Restaurant Service
   restaurant-service:
     build:
-      context: ./backend
+      context: ./backend/Restaurant-service
       dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: Restaurant-service
     container_name: tofork-restaurant-service
     ports:
       - "8083:8083"
@@ -102,6 +106,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       JWT_SECRET: mySecretKeyWhichIsLongEnoughForHS256
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -110,16 +115,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     networks:
       - tofork-network
 
   # Payment Service
   payment-service:
     build:
-      context: ./backend
+      context: ./backend/Payment-service
       dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: Payment-service
     container_name: tofork-payment-service
     ports:
       - "8084:8084"
@@ -128,6 +133,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       JWT_SECRET: mySecretKeyWhichIsLongEnoughForHS256
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -136,16 +142,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     networks:
       - tofork-network
 
   # Booking Service
   booking-service:
     build:
-      context: ./backend
+      context: ./backend/Booking-service
       dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: Booking-service
     container_name: tofork-booking-service
     ports:
       - "8085:8085"
@@ -154,6 +160,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       JWT_SECRET: mySecretKeyWhichIsLongEnoughForHS256
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -162,6 +169,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     networks:
       - tofork-network
 
@@ -180,7 +189,7 @@ services:
     networks:
       - tofork-network
 
-  # API Gateway
+  # API Gateway (NGINX)
   api-gateway:
     image: nginx:alpine
     container_name: tofork-api-gateway

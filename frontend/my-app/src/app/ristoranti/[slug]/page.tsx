@@ -1,16 +1,24 @@
 'use client';
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import restaurants from '../../components/restaurantsData';
 import CalendarBooking from '../../components/CalendarBooking';
 import FoodCard from '../../components/FoodCard';
 
+interface MenuItem {
+    id: string | number;
+    title: string;
+    description: string;
+    price: number;
+    imageUrl: string;
+}
+
 const RistoranteDettaglioPage = () => {
     const { slug } = useParams();
     const restaurant = restaurants.find(r => r.slug === slug);
+    const categories = restaurant?.menu ? Object.keys(restaurant.menu) : [];
+    const [selectedTab, setSelectedTab] = useState(categories[0] ?? '');
 
-    // Se il ristorante non è trovato
     if (!restaurant) {
         return (
             <div className="px-8 py-20 text-center">
@@ -19,29 +27,17 @@ const RistoranteDettaglioPage = () => {
         );
     }
 
-    const menuData = restaurant.menu;
-    const categories = Object.keys(menuData);
-    const [selectedTab, setSelectedTab] = useState(categories[0] ?? '');
-
+    const menuData = restaurant.menu ?? {};
     const handleBookingSubmit = (details: { date: Date; time: string; guests: number }) => {
         alert(`Prenotazione per ${restaurant.name} il ${details.date.toLocaleDateString()} alle ${details.time} per ${details.guests} persone.`);
     };
 
     return (
         <main className="px-8 sm:px-20 py-20 bg-gray-50">
-            {/* --- Header con immagine --- */}
-            <section
-                className="relative h-[300px] rounded-2xl overflow-hidden mb-12 flex items-center justify-center"
-                style={{
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${restaurant.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }}
-            >
+            <section className="relative h-[300px] rounded-2xl overflow-hidden mb-12 flex items-center justify-center"
+                     style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${restaurant.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <h1 className="text-4xl md:text-5xl font-bold text-white">{restaurant.name}</h1>
             </section>
-
-            {/* --- Info + Prenotazione --- */}
             <div className="flex flex-col lg:flex-row gap-10">
                 <div className="lg:w-2/3">
                     <h2 className="text-2xl font-bold mb-4 text-gray-900">In breve</h2>
@@ -59,29 +55,19 @@ const RistoranteDettaglioPage = () => {
                     <CalendarBooking onBookingSubmit={handleBookingSubmit} />
                 </div>
             </div>
-
-            {/* --- Sezione Menù --- */}
             <section className="mt-16">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900">
-                    Se vuoi puoi già preordinare i tuoi piatti!
-                </h2>
-                {/* Tabs categorie piatti */}
+                <h2 className="text-2xl font-bold mb-4 text-gray-900">Se vuoi puoi già preordinare i tuoi piatti!</h2>
                 <div className="my-6 p-3 bg-orange-500 rounded-xl shadow-lg flex items-center justify-center gap-4">
                     {categories.map(tab => (
                         <button
                             key={tab}
                             onClick={() => setSelectedTab(tab)}
-                            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ease-in-out ${
-                                selectedTab === tab
-                                    ? 'bg-white text-orange-600 shadow-md scale-105'
-                                    : 'bg-transparent text-white hover:bg-white/20'
-                            }`}
+                            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ease-in-out ${selectedTab === tab ? 'bg-white text-orange-600 shadow-md scale-105' : 'bg-transparent text-white hover:bg-white/20'}`}
                         >
                             {tab}
                         </button>
                     ))}
                 </div>
-                {/* Lista piatti */}
                 <div className="space-y-10">
                     {menuData && Object.entries(menuData)
                         .filter(([category]) => category === selectedTab)
@@ -89,7 +75,7 @@ const RistoranteDettaglioPage = () => {
                             <div key={category}>
                                 <h3 className="text-2xl font-bold mb-6 text-orange-500">{category}</h3>
                                 <div className="flex flex-wrap justify-center gap-4">
-                                    {(items as any[]).map(item => (
+                                    {(items as MenuItem[]).map(item => (
                                         <FoodCard
                                             key={item.id}
                                             title={item.title}

@@ -44,7 +44,7 @@ body {
 }
 
 .div-text {
-  #background-color: rgba(20, 20, 20, 0.7);
+  background-color: rgba(20, 20, 20, 0.7);
   color: white;
   padding: 25px 30px;
   border-radius: 14px;

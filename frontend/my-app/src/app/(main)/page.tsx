@@ -181,7 +181,7 @@ export default function Home() {
                <div className="relative bg-white rounded-2xl shadow-lg p-4 pl-8 border border-gray-100">
                  <span className="absolute -left-6 top-2 text-3xl font-bold text-[#ff9100]">1</span>
                  <p className="font-semibold text-black">Abbiamo ricevuto la tua prenotazione!</p>
-                 <p className="text-gray-500 text-sm mt-1">In attesa dell'accettazione del ristorante</p>
+                 <p className="text-gray-500 text-sm mt-1">In attesa dell&accettazione del ristorante</p>
                </div>
 
                {/* Step 2 */}
@@ -327,7 +327,7 @@ export default function Home() {
        <section>
          <h2 className="text-2xl font-semibold mb-6 text-black">Ristoranti Popolari</h2>
          <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 items-center">
-           {POPULAR.map((rest, idx) => (
+           {POPULAR.map((rest) => (
                <Link
                    key={rest.slug}
                    href={`/ristoranti/${rest.slug}`}
