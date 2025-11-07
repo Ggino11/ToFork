@@ -2,7 +2,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import '../globals.css';
-import Tabs from "../components/tabs";
+import Tabs from "../components/Tabs";
 import SearchBar from "../components/SearchBar";
 import RestaurantList from "../components/RestaurantList";
 import dynamic from "next/dynamic";
