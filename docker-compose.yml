@@ -52,7 +52,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       JWT_SECRET: mySecretKeyWhichIsLongEnoughForHS256
-      APP_FRONTEND_URL: http://localhost
+      APP_FRONTEND_URL: http://localhost:3000
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: admin

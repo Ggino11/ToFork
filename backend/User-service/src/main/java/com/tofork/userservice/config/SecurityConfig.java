@@ -91,13 +91,14 @@ public class SecurityConfig {
                 System.out.println("🟢 === OAuth2 Success Handler chiamato ===");
 
                 OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-                System.out.println("🟢 OAuth2User ottenuto: " + oauth2User.getAttributes());
+                System.out.println("🟢 OAuth2User ottenuto");
 
                 Map<String, Object> userData = oauth2Service.processOAuthUser(oauth2User);
-                System.out.println("🟢 UserData processato: " + userData);
+                System.out.println("🟢 UserData processato");
 
                 String fullName = userData.get("firstName") + " " + userData.get("lastName");
 
+                // ⭐ Assicurati che frontendUrl sia corretto
                 String redirectUrl = UriComponentsBuilder
                         .fromHttpUrl(frontendUrl + "/auth")
                         .queryParam("token", userData.get("token"))
@@ -107,15 +108,27 @@ public class SecurityConfig {
                         .queryParam("role", userData.get("role"))
                         .build().toUriString();
 
-                System.out.println("🟢 Redirect URL: " + redirectUrl);
+                System.out.println("🟢 Redirect URL finale: " + redirectUrl);
+
+                // ⭐ Invia il redirect UNA SOLA VOLTA
+                response.setStatus(HttpServletResponse.SC_FOUND);
                 response.sendRedirect(redirectUrl);
+                return; // ⭐ IMPORTANTE: ritorna subito dopo redirect
 
             } catch (Exception e) {
-                System.err.println("❌ ERRORE OAuth2 Success Handler:");
-                System.err.println("❌ Messaggio: " + e.getMessage());
+                System.err.println("❌ ERRORE OAuth2 Success Handler: " + e.getMessage());
                 e.printStackTrace();
-                response.sendRedirect(frontendUrl + "/auth?error=oauth_failed&detail=" + e.getMessage());
+
+                try {
+                    String errorRedirect = frontendUrl + "/auth?error=oauth_failed";
+                    response.setStatus(HttpServletResponse.SC_FOUND);
+                    response.sendRedirect(errorRedirect);
+                    return; // ⭐ IMPORTANTE: ritorna subito
+                } catch (Exception ex) {
+                    System.err.println("❌ Errore durante error redirect: " + ex.getMessage());
+                }
             }
         };
     }
+
 }

@@ -158,11 +158,12 @@ const AuthPage = () => {
   const [formMode, setFormMode] = useState<
     "login" | "signupUser" | "signupRestaurant"
   >("login");
-  const { login, isLoading, isAuthenticated } = useAuth();
+  const { login, isLoading } = useAuth();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Leggi parametri query solo una volta al mount
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
     const userId = urlParams.get("userId");
@@ -171,13 +172,19 @@ const AuthPage = () => {
     const role = urlParams.get("role");
     const error = urlParams.get("error");
 
+    console.log("🔵 AuthPage - Parametri query ricevuti:", { token: !!token, userId, email, error });
+
+    // Gestisci errore
     if (error) {
       setServerError("Errore durante login con Google. Riprova.");
       window.history.replaceState({}, "", "/auth");
       return;
     }
 
+    // Se ci sono i parametri OAuth, elaborali UNA SOLA VOLTA
     if (token && userId && email) {
+      console.log("✅ OAuth redirect rilevato, effettuo login...");
+
       const nameParts = (name || "").split(" ").filter(Boolean);
       const userData = {
         id: parseInt(userId),
@@ -188,15 +195,20 @@ const AuthPage = () => {
         provider: "GOOGLE" as const,
         emailVerified: true,
       };
+
+      // ⭐ Chiama login
       login(token, userData);
+
+      // ⭐ Pulisci URL subito SENZA redirect a /auth
       window.history.replaceState({}, "", "/auth");
-      setTimeout(() => router.push("/"), 100);
+
+      // ⭐ Aspetta che il context si aggiorni, POI vai alla home
+      setTimeout(() => {
+        console.log("✅ Redirect verso home");
+        router.push("/");
+      }, 50);
     }
-  }, [login, router]);
-// NB da capire se tenere o meno perche se lo tengo va in vconflitto con on submit del form e non rimanda alla pagina corretta per i ristoratorri
-   useEffect(() => {
-     if (isAuthenticated) router.push("/");
-   }, [isAuthenticated, router]);
+  }, []); // ⭐ DEPENDENCY ARRAY VUOTO: esegui SOLO al mount
 
   const currentSchema = useMemo(() => {
     switch (formMode) {
@@ -284,6 +296,57 @@ const AuthPage = () => {
       );
     }
   };
+
+  const [oauthProcessed, setOauthProcessed] = useState(false);
+
+  useEffect(() => {
+    // Se già elaborato, non fare nulla
+    if (oauthProcessed) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    const userId = urlParams.get("userId");
+    const email = urlParams.get("email");
+    const name = urlParams.get("name");
+    const role = urlParams.get("role");
+    const error = urlParams.get("error");
+
+    console.log("🔵 AuthPage - Parametri query ricevuti:", { token: !!token, userId, email, error });
+
+    if (error) {
+      setServerError("Errore durante login con Google. Riprova.");
+      window.history.replaceState({}, "", "/auth");
+      setOauthProcessed(true);
+      return;
+    }
+
+    if (token && userId && email) {
+      console.log("✅ OAuth redirect rilevato, effettuo login...");
+
+      const nameParts = (name || "").split(" ").filter(Boolean);
+      const userData = {
+        id: parseInt(userId),
+        email: email,
+        firstName: nameParts[0] || "User",
+        lastName: nameParts.slice(1).join(" ") || "",
+        role: (role as "CUSTOMER" | "RESTAURANT_OWNER") || "CUSTOMER",
+        provider: "GOOGLE" as const,
+        emailVerified: true,
+      };
+
+      login(token, userData);
+      window.history.replaceState({}, "", "/auth");
+
+      // ⭐ Marker che OAuth è stato elaborato
+      setOauthProcessed(true);
+
+      setTimeout(() => {
+        console.log("✅ Redirect verso home");
+        router.push("/");
+      }, 50);
+    }
+  }, [oauthProcessed, login, router]); // Aggiungi oauthProcessed alle dependencies
+
 
   const handleGoogleSignIn = () => {
     window.location.href = `${
