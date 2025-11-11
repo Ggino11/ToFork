@@ -194,9 +194,9 @@ const AuthPage = () => {
     }
   }, [login, router]);
 // NB da capire se tenere o meno perche se lo tengo va in vconflitto con on submit del form e non rimanda alla pagina corretta per i ristoratorri
-//   useEffect(() => {
-//     if (isAuthenticated) router.push("/");
-//   }, [isAuthenticated, router]);
+   useEffect(() => {
+     if (isAuthenticated) router.push("/");
+   }, [isAuthenticated, router]);
 
   const currentSchema = useMemo(() => {
     switch (formMode) {
