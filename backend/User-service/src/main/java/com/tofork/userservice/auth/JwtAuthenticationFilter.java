@@ -59,6 +59,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtService.validateToken(jwt)) {
                 System.out.println("--- [DEBUG] JwtAuthenticationFilter: Token valido. Inizio ricerca utente.");
                 userRepository.findByEmail(userEmail).ifPresent(user -> {
+                    // Per utenti OAuth2, la password potrebbe essere null
+                    String password = user.getPassword() != null ? user.getPassword() : "";
                     System.out.println("--- [DEBUG] JwtAuthenticationFilter: Utente trovato nel database: " + user.getEmail());
 
                     UserDetails userDetails = new User(user.getEmail(), user.getPassword(), new ArrayList<>());
