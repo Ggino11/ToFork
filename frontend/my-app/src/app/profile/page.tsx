@@ -1,34 +1,61 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ProfileSidebar from '../components/ProfileSidebar';
 import UserInfo from '../components/UserInfo';
 import Payments from '../components/Payments';
 import Orders from '../components/Orders';
+import { useAuth } from '../context/AuthContext';
 
 // tipo per le viste possibili nella dashboard
 type ActiveView = 'profile' | 'payments' | 'orders';
 
 export default function ProfilePage() {
   const [activeView, setActiveView] = useState<ActiveView>('profile');
+  // prendo i dati veri dal Context 
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
-  // Dati utente d'esempio (in futuro arriveranno da una chiamata API)
-  const dummyUser = {
-    name: "Mario",
-    lastName: "Rossi",
-    email: "mario.rossi@example.com",
+  // Se l'utente non è loggato, manda a registrazione login
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/auth');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Loading state 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <p className="text-gray-500 text-lg">Caricamento profilo...</p>
+      </div>
+    );
+  }
+
+  // Se non c'è utente, non mostriamo nulla (il redirect sopra ci penserà)
+  if (!user) {
+    return null;
+  }
+
+  // mappo dati del backend (firstName) nel formato che UserInfo vuole (name)
+  const userDataForDisplay = {
+    name: user.firstName,
+    lastName: user.lastName, 
+    email: user.email, 
   };
 
   const renderContent = () => {
     switch (activeView) {
       case 'profile':
-        return <UserInfo user={dummyUser} />;
+        // passo i dati veri al componente
+        return <UserInfo user={userDataForDisplay} />;
       case 'payments':
         return <Payments />;
       case 'orders':
         return <Orders />;
       default:
-        return <UserInfo user={dummyUser} />;
+        return <UserInfo user={userDataForDisplay} />;
     }
   };
 

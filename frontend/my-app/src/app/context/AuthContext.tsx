@@ -19,26 +19,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // ⭐ Inizializzazione: carica da localStorage al mount
+    // Inizializzazione: carica da localStorage al mount
     useEffect(() => {
         const initAuth = () => {
             try {
                 const storedToken = localStorage.getItem("token");
                 const storedUser = localStorage.getItem("user");
 
-                console.log('🔵 AuthContext inizializzazione:', {
+                console.log('AuthContext inizializzazione:', {
                     hasToken: !!storedToken,
                     hasUser: !!storedUser
                 });
 
                 if (storedToken && storedUser) {
                     const parsedUser = JSON.parse(storedUser);
-                    console.log('✅ Utente recuperato da localStorage:', parsedUser);
+                    console.log(' Utente recuperato da localStorage:', parsedUser);
                     setToken(storedToken);
                     setUser(parsedUser);
                 }
             } catch (error) {
-                console.error("❌ Errore durante inizializzazione auth:", error);
+                console.error(" Errore durante inizializzazione auth:", error);
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
             } finally {
@@ -49,9 +49,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         initAuth();
     }, []);
 
-    // ⭐ Funzione login
+    // Funzione login
     const login = (newToken: string, userData: User) => {
-        console.log('🟢 Login chiamato con:', { token: newToken, user: userData });
+        console.log('Login chiamato con:', { token: newToken, user: userData });
 
         // Salva in localStorage
         localStorage.setItem("token", newToken);
@@ -61,12 +61,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setToken(newToken);
         setUser(userData);
 
-        console.log('✅ Login completato, stato aggiornato');
+        console.log(' Login completato, stato aggiornato');
     };
 
-    // ⭐ Funzione logout
+    // Funzione logout
     const logout = () => {
-        console.log('🔴 Logout chiamato');
+        console.log(' Logout chiamato');
 
         // Chiamata API logout (opzionale)
         if (token) {
@@ -87,9 +87,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const isAuthenticated = !!token && !!user;
 
-    // ⭐ Log ogni volta che lo stato cambia (debug)
+    // Log ogni volta che lo stato cambia (debug)
     useEffect(() => {
-        console.log('🔵 AuthContext stato aggiornato:', {
+        console.log('AuthContext stato aggiornato:', {
             isAuthenticated,
             hasToken: !!token,
             hasUser: !!user,

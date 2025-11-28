@@ -1,8 +1,9 @@
 'use client';
 
 import { FaUser, FaCreditCard, FaReceipt, FaSignOutAlt } from 'react-icons/fa';
-import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+// RIMOSSO: import Link (creava conflitti)
+// RIMOSSO: import router (non serve e quello di next/router è deprecato in app dir)
 
 // Definisci i tipi per le props
 type ActiveView = 'profile' | 'payments' | 'orders';
@@ -21,11 +22,28 @@ const navItems = [
 export default function ProfileSidebar({ activeView, setActiveView }: ProfileSidebarProps) {
   
   const { logout } = useAuth();
-  const handleLogout = () => {
-   
-    logout();
-    console.log("Logout clicked");
-   
+
+  const handleLogout = async () => {
+    // Ho cambiato il messaggio di log così se lo vedi sai che il file è aggiornato
+    console.log("Inizio procedura logout...");
+    
+    try {
+      await logout();
+      console.log(" API Logout completata");
+    } catch (error) {
+      console.error("Errore API Logout (ignorato per forzare uscita):", error);
+    }
+    
+    // Pulizia manuale di sicurezza
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        
+        console.log("LocalStorage pulito. Redirect forzato.");
+        
+        //ricarica la pagina da zero e ti porta alla home.
+        window.location.href = '/';
+    }
   };
 
   return (
@@ -51,7 +69,6 @@ export default function ProfileSidebar({ activeView, setActiveView }: ProfileSid
       {/* Bottone di Logout */}
       <div>
         <hr className="my-4 border-gray-200" />
-        <Link  href="/">
         <button
            onClick={handleLogout}
            className="flex items-center gap-3 w-full px-4 py-3 text-orange-500 rounded-lg hover:bg-orange-50 transition-colors duration-200"
@@ -59,7 +76,6 @@ export default function ProfileSidebar({ activeView, setActiveView }: ProfileSid
             <FaSignOutAlt className="h-5 w-5" />
             <span className="font-semibold">Logout</span>
         </button>
-        </Link>
       </div>
     </div>
   );

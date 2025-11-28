@@ -3,6 +3,7 @@ import React, { FC } from 'react';
 import Image from 'next/image';
 // Importo le icone
 import { ClipboardList, CalendarDays, BookOpen, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 // Definisco il tipo View qui in modo che possa essere esportato
 // e usato anche dalla pagina principale (page.tsx)
@@ -24,6 +25,17 @@ const RestaurantSidebar: FC<RestaurantSidebarProps> = ({ activeView, setActiveVi
     { id: 'menu', label: 'Menu', icon: BookOpen },
   ];
 
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      console.log("logout eseguito con successo");
+    }
+    catch (error) {
+      console.error("Errore durante il logout:", error);
+    }
+  };
   return (
     // Sidebar: sfondo bianco, testo scuro, bordo a destra
     <div className="w-64 bg-white text-gray-900 flex flex-col h-screen fixed top-0 left-0 border-r border-gray-200">
@@ -65,7 +77,7 @@ const RestaurantSidebar: FC<RestaurantSidebarProps> = ({ activeView, setActiveVi
       <div className="p-4 border-t border-gray-200">
         <button
           className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-          onClick={() => alert('Logout...')} 
+          onClick={handleLogout} 
         >
           <LogOut className="h-5 w-5" />
           <span>Logout</span>
