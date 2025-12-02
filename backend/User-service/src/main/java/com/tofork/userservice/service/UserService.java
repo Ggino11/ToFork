@@ -9,6 +9,7 @@ import com.tofork.userservice.model.User;
 import com.tofork.userservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,11 +21,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final WebClient.Builder webClientBuilder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, WebClient.Builder webClientBuilder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.webClientBuilder = webClientBuilder;
     }
 
     public ApiResponse<Map<String, Object>> register(RegisterRequest request) {
@@ -48,7 +51,11 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return createAuthenticationResponse("Registrazione completata con successo", savedUser);
+        if (request.isRestaurantRegistration()) {
+            createRestaurantForUser(savedUser, request);
+        }
+
+        return createAuthenticationResponse("Registrazione avvenuta con successo", savedUser);
     }
 
     public ApiResponse<Map<String, Object>> login(LoginRequest request) {
@@ -111,5 +118,35 @@ public class UserService {
         userResponse.put("provider", user.getProvider().name());
 
         return userResponse;
+    }
+
+    private void createRestaurantForUser(User user, RegisterRequest request) {
+        try {
+            Map<String, Object> restaurantPayload = new HashMap<>();
+            restaurantPayload.put("name", request.getRestaurantName());
+            restaurantPayload.put("address", request.getAddress());
+            restaurantPayload.put("description", request.getDescription());
+            restaurantPayload.put("category", request.getCategory());
+            restaurantPayload.put("ownerId", user.getId());
+            // Generate slug
+            String slug = request.getRestaurantName().toLowerCase().replaceAll("[^a-z0-9]", "-") + "-" + user.getId();
+            restaurantPayload.put("slug", slug);
+
+            System.out.println("Creating restaurant with payload: " + restaurantPayload);
+
+            String response = webClientBuilder.build()
+                    .post()
+                    .uri("http://restaurant-service:8083/api/restaurants")
+                    .bodyValue(restaurantPayload)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block(); // Synchronous call
+
+            System.out.println("Restaurant created successfully: " + response);
+        } catch (Exception e) {
+            System.err.println("Failed to create restaurant: " + e.getMessage());
+            e.printStackTrace();
+            
+        }
     }
 }

@@ -29,6 +29,8 @@ public class MenuItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    private String imageUrl;
+
     private String category;
 
     @Column(nullable = false)

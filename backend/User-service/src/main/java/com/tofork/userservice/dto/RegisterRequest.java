@@ -12,6 +12,8 @@ public class RegisterRequest {
     // Campi specifici per ristoratori (se presenti = è un ristoratore)
     private String restaurantName;
     private String address;
+    private String description;
+    private String category;
     private String adminFirstName;
     private String adminLastName;
     private String userType;
@@ -65,6 +67,12 @@ public class RegisterRequest {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
     public String getAdminFirstName() { return adminFirstName; }
     public void setAdminFirstName(String adminFirstName) { this.adminFirstName = adminFirstName; }

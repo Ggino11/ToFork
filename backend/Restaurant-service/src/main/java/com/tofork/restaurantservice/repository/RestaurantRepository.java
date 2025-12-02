@@ -10,5 +10,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     List<Restaurant> findByName(String name);
 
-    List<Restaurant> findbydescription(String description);
+    List<Restaurant> findByDescriptionContainingIgnoreCase(String description);
+
+    List<Restaurant> findByNameContainingIgnoreCase(String name);
+
+    java.util.Optional<Restaurant> findBySlug(String slug);
 }
