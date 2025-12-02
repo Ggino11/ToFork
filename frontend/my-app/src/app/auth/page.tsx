@@ -142,6 +142,12 @@ const signupRestaurantSchema = z.object({
   address: z
     .string()
     .min(5, { message: "L'indirizzo deve avere almeno 5 caratteri" }),
+  category: z
+    .string()
+    .min(3, { message: "La categoria deve avere almeno 3 caratteri" }),
+  description: z
+    .string()
+    .min(10, { message: "La descrizione deve avere almeno 10 caratteri" }),
   adminFirstName: z
     .string()
     .min(2, { message: "Il nome deve contenere almeno 2 caratteri" }),
@@ -264,7 +270,7 @@ const AuthPage = () => {
         result = JSON.parse(responseText);
       } catch {
         setServerError(
-          "Errore inaspettato dal server. Controlla la console del backend."
+          "Errore inaspettato dal server."
         );
         return;
       }
@@ -292,7 +298,7 @@ const AuthPage = () => {
       }
     } catch {
       setServerError(
-        "Errore di connessione. Controlla che il backend sia attivo."
+        "Errore di connessione. "
       );
     }
   };
@@ -521,6 +527,52 @@ const AuthPage = () => {
                 {errors.address && (
                   <p className="text-red-400 text-xs mt-1">
                     {errors.address.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  className="text-sm font-medium text-gray-300"
+                  htmlFor="category"
+                >
+                  Categoria (es. Pizza, Sushi)
+                </label>
+                <div className="relative">
+                  <RestaurantIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    id="category"
+                    type="text"
+                    {...register("category")}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-10"
+                    placeholder="Italiana"
+                  />
+                </div>
+                {errors.category && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {errors.category.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  className="text-sm font-medium text-gray-300"
+                  htmlFor="description"
+                >
+                  Descrizione
+                </label>
+                <div className="relative">
+                  <textarea
+                    id="description"
+                    {...register("description")}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 pl-3 min-h-[80px]"
+                    placeholder="Descrivi il tuo ristorante..."
+                  />
+                </div>
+                {errors.description && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {errors.description.message as string}
                   </p>
                 )}
               </div>

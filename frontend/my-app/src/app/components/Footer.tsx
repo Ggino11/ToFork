@@ -12,7 +12,7 @@ export default function Footer() {
         <div className="flex-1 mb-3 md:mb-0">
           <Link href="/" className="text-2xl font-bold text-logo">
             <Image
-              src={"/Logo.svg"}
+              src={"/logo.svg"}
               alt="ToFork logo"
               width={150}
               height={50}
