@@ -12,6 +12,10 @@ export default function Navbar() {
     const pathname = usePathname();
     const { isAuthenticated, user } = useAuth();
 
+
+    const isRistoranti = pathname.startsWith('/ristoranti');
+    const isHome = pathname === '/' || pathname === '';
+
     return (
         <nav className="fixed w-full z-50 bg-white shadow-md px-6 py-1 flex items-center">
             {/* Logo */}
@@ -23,15 +27,17 @@ export default function Navbar() {
                 <div className="hidden md:flex items-center space-x-2">
                     <Link
                         href="/"
-                        className={`rounded-2xl py-0.5 px-3 ${
-                            pathname === "/" ? "bg-orange-500 text-white" : "text-black hover:text-white hover:bg-orange-500 transition"
+                        className={`rounded-2xl py-0.5 px-3 transition ${
+                            isHome ? "bg-orange-500 text-white" : "text-black hover:text-white hover:bg-orange-500"
                         }`}
                     >
                         Home
                     </Link>
                     <Link
                         href="/ristoranti"
-                        className="hover:text-white hover:bg-orange-500 transition text-black rounded-2xl py-0.5 px-3"
+                        className={`rounded-2xl py-0.5 px-3 transition ${
+                            isRistoranti ? "bg-orange-500 text-white" : "text-black hover:text-white hover:bg-orange-500"
+                        }`}
                     >
                         Ristoranti
                     </Link>
@@ -47,10 +53,6 @@ export default function Navbar() {
                                 userLastName={user.lastName}
                                 size={40}
                             />
-                            {/* Da rimuovere display solo avatar */}
-                            {/* <span className="hidden md:inline text-orange-500 font-medium">
-                {user.firstName}
-              </span> */}
                         </Link>
                     ) : (
                         <>

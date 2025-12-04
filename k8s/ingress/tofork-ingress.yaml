@@ -1,0 +1,81 @@
+# ---------------------------------------
+# 1. INGRESS PER IL FRONTEND (Senza Rewrite)
+# ---------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tofork-frontend-ingress
+  namespace: tofork
+  # NESSUNA annotazione di rewrite qui!
+  # Il frontend deve ricevere l'URL pulito per gestire le sue rotte interne e i file statici (_next/static/...)
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: tofork.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000
+
+---
+
+# ---------------------------------------
+# 2. INGRESS PER I MICROSERVIZI (Con Rewrite)
+# ---------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tofork-backend-ingress
+  namespace: tofork
+  annotations:
+    # Qui usiamo il rewrite per trasformare "/api/orders/1" in "/1" (o quello che si aspetta il backend)
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: tofork.local
+      http:
+        paths:
+          # API microservizi
+          # Il gruppo (.*) diventa $2 nel rewrite
+          - path: /api/orders(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8082
+          - path: /api/bookings(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: booking-service
+                port:
+                  number: 8086
+          - path: /api/restaurants(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-service
+                port:
+                  number: 8083
+          - path: /api/users(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8081
+          - path: /api/payments(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 8084
