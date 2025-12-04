@@ -2,25 +2,46 @@ import React, { useState } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { it } from "date-fns/locale";
+import { useAuth } from "../context/AuthContext";
 
 const timeSlots = ["19:00", "19:30", "20:00", "20:30", "21:00", "21:30"];
 
 interface CalendarBookingProps {
+    restaurantId: number;
     onBookingSubmit: (bookingDetails: { date: Date; time: string; guests: number }) => void;
 }
 
-const CalendarBooking: React.FC<CalendarBookingProps> = ({ onBookingSubmit }) => {
+const CalendarBooking: React.FC<CalendarBookingProps> = ({ restaurantId, onBookingSubmit }) => {
+    const { user } = useAuth();
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
     const [selectedTime, setSelectedTime] = useState<string>("");
     const [guests, setGuests] = useState(2);
 
     const handleBooking = () => {
+        if (!user) {
+            alert("Devi effettuare il login per prenotare.");
+            return;
+        }
+
         if (!selectedDate || !selectedTime) {
             alert("Per favore, seleziona una data e un orario.");
             return;
         }
+
         onBookingSubmit({ date: selectedDate, time: selectedTime, guests });
     };
+
+    if (!user) {
+        return (
+            <div className="bg-white rounded-2xl shadow-xl p-8 sticky top-8 border border-gray-200 text-center">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Prenota un tavolo</h3>
+                <p className="text-gray-500 mb-6">Accedi per verificare la disponibilità e prenotare.</p>
+                <a href="/auth" className="inline-block bg-orange-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-700 transition-colors">
+                    Accedi
+                </a>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-8 border border-gray-200">
@@ -99,7 +120,7 @@ const CalendarBooking: React.FC<CalendarBookingProps> = ({ onBookingSubmit }) =>
                 onClick={handleBooking}
                 className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg shadow-md hover:bg-orange-600 transition-all duration-300 transform hover:-translate-y-1"
             >
-                Verifica disponibilità
+                Prenota Tavolo
             </button>
         </div>
     );

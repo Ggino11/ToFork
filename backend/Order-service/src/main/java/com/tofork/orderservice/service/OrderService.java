@@ -65,24 +65,4 @@ public interface OrderService {
      * Verifica se il ristorante può accedere all'ordine
      */
     boolean canRestaurantAccessOrder(Long orderId, Long restaurantId) throws Exception;
-
-    /**
-     * Calcola statistiche per un ristorante
-     */
-    Map<String, Object> getRestaurantStats(Long restaurantId);
-
-    /**
-     * Calcola revenue totale per un ristorante
-     */
-    Double calculateRestaurantRevenue(Long restaurantId);
-
-    /**
-     * Calcola revenue per un ristorante in un range di date
-     */
-    Double calculateRestaurantRevenueByDateRange(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate);
-
-    /**
-     * Ottieni conteggio ordini per stato per un ristorante
-     */
-    Map<OrderStatus, Long> getOrderCountsByStatus(Long restaurantId);
 }

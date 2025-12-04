@@ -14,6 +14,9 @@ public class RestaurantController {
     @Autowired
     private RestaurantService service;
 
+    @Autowired
+    private com.tofork.restaurantservice.service.RestaurantTableService tableService;
+
     @GetMapping
     public List<RestaurantDTO> getAll(@RequestParam(required = false) String query) {
         if (query != null && !query.isEmpty()) return service.search(query);
@@ -48,5 +51,15 @@ public class RestaurantController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping("/{id}/capacity")
+    public Integer getCapacity(@PathVariable Long id) {
+        return service.getRestaurantCapacity(id);
+    }
+
+    @GetMapping("/{id}/tables")
+    public List<com.tofork.restaurantservice.model.RestaurantTable> getTables(@PathVariable Long id) {
+        return tableService.getByRestaurantId(id);
     }
 }

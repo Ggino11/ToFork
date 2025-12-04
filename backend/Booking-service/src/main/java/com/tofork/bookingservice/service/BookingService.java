@@ -72,12 +72,7 @@ public interface BookingService {
     boolean canRestaurantAccessBooking(Long bookingId, Long restaurantId) throws Exception;
 
     /**
-     * Calcola statistiche per un ristorante
+     * Verifica disponibilità per una prenotazione
      */
-    Map<String, Object> getRestaurantStats(Long restaurantId);
-
-    /**
-     * Ottieni conteggio prenotazioni per stato per un ristorante
-     */
-    Map<BookingStatus, Long> getBookingCountsByStatus(Long restaurantId);
+    boolean checkAvailability(Long restaurantId, LocalDateTime date, Integer peopleCount);
 }

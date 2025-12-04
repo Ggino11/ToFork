@@ -38,6 +38,12 @@ public class BookingServiceImpl implements BookingService {
             throw new Exception("Hai già una prenotazione confermata per questo ristorante in questa data");
         }
 
+        // Trova un tavolo disponibile
+        Long tableId = findAvailableTable(request.getRestaurantId(), request.getBookingDate(), request.getPeopleCount());
+        if (tableId == null) {
+            throw new Exception("Nessun tavolo disponibile per la data e il numero di persone selezionati");
+        }
+
         // Crea prenotazione
         Booking booking = new Booking();
         booking.setUserId(request.getUserId());
@@ -49,6 +55,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setPeopleCount(request.getPeopleCount());
         booking.setPhoneNumber(request.getPhoneNumber());
         booking.setSpecialRequests(request.getSpecialRequests());
+        booking.setTableId(tableId);
         booking.setStatus(BookingStatus.PENDING);
 
         return bookingRepository.save(booking);
@@ -176,34 +183,67 @@ public class BookingServiceImpl implements BookingService {
         return booking.getRestaurantId().equals(restaurantId);
     }
 
+    @Autowired
+    private org.springframework.web.client.RestTemplate restTemplate;
+
     @Override
-    public Map<String, Object> getRestaurantStats(Long restaurantId) {
-        Map<String, Object> stats = new HashMap<>();
+    public boolean checkAvailability(Long restaurantId, LocalDateTime date, Integer peopleCount) {
+        try {
+            // 1. Fetch tables from Restaurant-service
+            String url = "http://restaurant-service:8083/api/restaurants/" + restaurantId + "/tables";
+            org.springframework.core.ParameterizedTypeReference<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> responseType = 
+                new org.springframework.core.ParameterizedTypeReference<>() {};
+            org.springframework.http.ResponseEntity<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> response = 
+                restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, null, responseType);
+            
+            List<com.tofork.bookingservice.dto.RestaurantTableDTO> tables = response.getBody();
 
-        // Conteggio prenotazioni totali
-        Long totalBookings = bookingRepository.countByRestaurantId(restaurantId);
-        stats.put("totalBookings", totalBookings);
+            if (tables == null || tables.isEmpty()) {
+                return false;
+            }
 
-        // Conteggio per stato
-        Map<BookingStatus, Long> statusCounts = getBookingCountsByStatus(restaurantId);
-        stats.put("bookingsByStatus", statusCounts);
+            // 2. Find a suitable table
+            for (com.tofork.bookingservice.dto.RestaurantTableDTO table : tables) {
+                if (table.getSeats() >= peopleCount) {
+                    // Check for overlaps
+                    List<Booking> overlaps = bookingRepository.findOverlappingBookings(table.getId(), date, date.plusHours(2));
+                    if (overlaps.isEmpty()) {
+                        return true; // Found a table!
+                    }
+                }
+            }
+            
+            return false; // No table found
 
-        // Prenotazioni di oggi
-        List<Booking> todayBookings = getTodayRestaurantBookings(restaurantId);
-        stats.put("todayBookings", todayBookings.size());
-
-        return stats;
+        } catch (Exception e) {
+            System.err.println("Error checking availability: " + e.getMessage());
+            return false;
+        }
     }
 
-    @Override
-    public Map<BookingStatus, Long> getBookingCountsByStatus(Long restaurantId) {
-        Map<BookingStatus, Long> counts = new HashMap<>();
+    private Long findAvailableTable(Long restaurantId, LocalDateTime date, Integer peopleCount) {
+        try {
+            String url = "http://restaurant-service:8083/api/restaurants/" + restaurantId + "/tables";
+            org.springframework.core.ParameterizedTypeReference<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> responseType = 
+                new org.springframework.core.ParameterizedTypeReference<>() {};
+            org.springframework.http.ResponseEntity<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> response = 
+                restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, null, responseType);
+            
+            List<com.tofork.bookingservice.dto.RestaurantTableDTO> tables = response.getBody();
 
-        for (BookingStatus status : BookingStatus.values()) {
-            Long count = bookingRepository.countByRestaurantIdAndStatus(restaurantId, status);
-            counts.put(status, count != null ? count : 0L);
+            if (tables != null) {
+                for (com.tofork.bookingservice.dto.RestaurantTableDTO table : tables) {
+                    if (table.getSeats() >= peopleCount) {
+                        List<Booking> overlaps = bookingRepository.findOverlappingBookings(table.getId(), date, date.plusHours(2));
+                        if (overlaps.isEmpty()) {
+                            return table.getId();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error finding table: " + e.getMessage());
         }
-
-        return counts;
+        return null;
     }
 }

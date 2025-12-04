@@ -257,38 +257,6 @@ public class OrderController {
         }
     }
 
-    /**
-     * GET /api/orders/restaurant/{restaurantId}/stats - Statistiche ristorante
-     */
-    @GetMapping("/restaurant/{restaurantId}/stats")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getRestaurantStats(
-            @PathVariable Long restaurantId,
-            @RequestHeader("Authorization") String authHeader) {
-        try {
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
-            }
-
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            String userRole = jwtService.getRoleFromToken(token);
-
-            // Solo ristoratori e admin possono vedere statistiche
-            if (!"RESTAURANT_OWNER".equals(userRole) && !"ADMIN".equals(userRole)) {
-                return ResponseEntity.ok(ApiResponse.error("Non autorizzato a vedere statistiche ristorante"));
-            }
-
-            Map<String, Object> stats = orderService.getRestaurantStats(restaurantId);
-            return ResponseEntity.ok(ApiResponse.success("Statistiche ristorante recuperate", stats));
-
-        } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante recupero statistiche: " + e.getMessage()));
-        }
-    }
-
     // Helper methods
     private boolean isValidAuthHeader(String authHeader) {
         return authHeader != null && authHeader.startsWith("Bearer ");

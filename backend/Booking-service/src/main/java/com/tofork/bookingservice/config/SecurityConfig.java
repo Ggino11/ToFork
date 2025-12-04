@@ -48,6 +48,7 @@ public class SecurityConfig {
                         // Endpoint pubblici
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/bookings/check-availability").permitAll()
 
                         // Tutti gli altri endpoint richiedono autenticazione
                         // L'autenticazione JWT verrà gestita manualmente nei controller

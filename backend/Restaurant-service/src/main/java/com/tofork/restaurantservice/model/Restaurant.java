@@ -50,10 +50,12 @@ public class Restaurant {
     private Long ownerId;
 
     @Builder.Default
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<RestaurantTable> tables = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<MenuItem> menuItems = new ArrayList<>();
 }

@@ -79,4 +79,12 @@ public class RestaurantService {
     public void delete(Long id) {
         repository.deleteById(id);
     }
+
+    public Integer getRestaurantCapacity(Long restaurantId) {
+        return repository.findById(restaurantId)
+                .map(restaurant -> restaurant.getTables().stream()
+                        .mapToInt(table -> table.getCapacity())
+                        .sum())
+                .orElse(0);
+    }
 }

@@ -56,6 +56,7 @@ public class RestaurantMapper {
                 .description(menuItem.getDescription())
                 .price(menuItem.getPrice())
                 .imageUrl(menuItem.getImageUrl())
+                .category(menuItem.getCategory())
                 .build();
     }
     

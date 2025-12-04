@@ -222,45 +222,4 @@ public class OrderServiceImpl implements OrderService {
         Order order = findOrderById(orderId);
         return order.getRestaurantId().equals(restaurantId);
     }
-
-    @Override
-    public Map<String, Object> getRestaurantStats(Long restaurantId) {
-        Map<String, Object> stats = new HashMap<>();
-
-        // Conteggio ordini totali
-        Long totalOrders = orderRepository.countByRestaurantId(restaurantId);
-        stats.put("totalOrders", totalOrders);
-
-        // Conteggio per stato
-        Map<OrderStatus, Long> statusCounts = getOrderCountsByStatus(restaurantId);
-        stats.put("ordersByStatus", statusCounts);
-
-        // Revenue totale
-        Double totalRevenue = calculateRestaurantRevenue(restaurantId);
-        stats.put("totalRevenue", totalRevenue != null ? totalRevenue : 0.0);
-
-        return stats;
-    }
-
-    @Override
-    public Double calculateRestaurantRevenue(Long restaurantId) {
-        return orderRepository.calculateTotalRevenueByRestaurant(restaurantId);
-    }
-
-    @Override
-    public Double calculateRestaurantRevenueByDateRange(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate) {
-        return orderRepository.calculateRevenueByRestaurantAndDateRange(restaurantId, startDate, endDate);
-    }
-
-    @Override
-    public Map<OrderStatus, Long> getOrderCountsByStatus(Long restaurantId) {
-        Map<OrderStatus, Long> counts = new HashMap<>();
-
-        for (OrderStatus status : OrderStatus.values()) {
-            Long count = orderRepository.countByRestaurantIdAndStatus(restaurantId, status);
-            counts.put(status, count != null ? count : 0L);
-        }
-
-        return counts;
-    }
 }

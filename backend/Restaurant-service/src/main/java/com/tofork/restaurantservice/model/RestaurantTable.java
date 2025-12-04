@@ -18,8 +18,8 @@ public class RestaurantTable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private Restaurant restaurant;
-
 
     @Column(nullable = false)
     private Integer tableNumber;

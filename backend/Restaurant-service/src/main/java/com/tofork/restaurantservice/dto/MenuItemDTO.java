@@ -17,4 +17,5 @@ public class MenuItemDTO {
     private String description;
     private BigDecimal price;
     private String imageUrl;
+    private String category;
 }

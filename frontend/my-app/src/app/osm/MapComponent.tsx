@@ -9,28 +9,15 @@ interface Restaurant {
     lat: number;
     lon: number;
     name?: string;
+    address?: string;
     opening_hours?: string;
     phone?: string;
     cuisine?: string;
     website?: string;
 }
 
-interface OSMElement {
-    id: number;
-    lat?: number;
-    lon?: number;
-    center?: { lat: number; lon: number };
-    tags?: {
-        name?: string;
-        opening_hours?: string;
-        phone?: string;
-        ["contact:phone"]?: string;
-        cuisine?: string;
-        website?: string;
-    };
-}
-
 const fixLeafletIcon = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete ((L.Icon.Default.prototype as unknown) as { _getIconUrl?: unknown })._getIconUrl;
     L.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
@@ -45,45 +32,47 @@ export default function MapComponent() {
     useEffect(() => {
         fixLeafletIcon();
 
-        const query = `
-      [out:json][timeout:25];
-      area["name"="Torino"]["boundary"="administrative"]->.searchArea;
-      (
-        node["amenity"="restaurant"](area.searchArea);
-        way["amenity"="restaurant"](area.searchArea);
-        relation["amenity"="restaurant"](area.searchArea);
-      );
-      out center;
-    `;
-
-        fetch('https://overpass-api.de/api/interpreter', {
-            method: 'POST',
-            body: query,
-        })
+        fetch('http://localhost:8083/api/restaurants')
             .then(res => res.json())
-            .then(data => {
-                const places: Restaurant[] = data.elements
-                    .map((el: OSMElement) => {
-                        let lat = el.lat;
-                        let lon = el.lon;
-                        if (!lat && el.center) {
-                            lat = el.center.lat;
-                            lon = el.center.lon;
+            .then(async (data: any[]) => {
+                // 1. Map initial data
+                const initialPlaces: Restaurant[] = data.map((r: any) => ({
+                    id: r.id,
+                    lat: r.lat,
+                    lon: r.lon,
+                    name: r.name,
+                    cuisine: r.category,
+                    address: r.address // Store address for geocoding
+                }));
+
+                // 2. Identify places needing geocoding
+                const placesToGeocode = initialPlaces.filter(p => !p.lat || !p.lon);
+                const placesWithCoords = initialPlaces.filter(p => p.lat && p.lon);
+
+                // 3. Geocode missing ones
+                const geocodedPlaces = await Promise.all(
+                    placesToGeocode.map(async (p) => {
+                        if (!p.address) return p;
+                        try {
+                            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(p.address)}`);
+                            const geoData = await response.json();
+                            if (geoData && geoData.length > 0) {
+                                return {
+                                    ...p,
+                                    lat: parseFloat(geoData[0].lat),
+                                    lon: parseFloat(geoData[0].lon)
+                                };
+                            }
+                        } catch (error) {
+                            console.error(`Failed to geocode ${p.name}:`, error);
                         }
-                        return {
-                            id: el.id,
-                            lat: lat!,
-                            lon: lon!,
-                            name: el.tags?.name,
-                            opening_hours: el.tags?.opening_hours,
-                            phone: el.tags?.phone || el.tags?.['contact:phone'],
-                            website: el.tags?.website,
-                            cuisine: el.tags?.cuisine,
-                        };
+                        return p;
                     })
-                    .filter((el: Restaurant) => el.lat && el.lon && el.name)
-                    .slice(0, 50);
-                setRestaurants(places);
+                );
+
+                // 4. Combine and set state (filtering out those that still failed)
+                const allPlaces = [...placesWithCoords, ...geocodedPlaces].filter(p => p.lat && p.lon);
+                setRestaurants(allPlaces);
             })
             .catch(console.error);
     }, []);

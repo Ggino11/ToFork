@@ -26,6 +26,9 @@ public class Booking {
     @Column(name = "restaurant_name", nullable = false)
     private String restaurantName;
 
+    @Column(name = "table_id")
+    private Long tableId;
+
     @Column(name = "booking_date", nullable = false)
     private LocalDateTime bookingDate;
 
@@ -100,6 +103,9 @@ public class Booking {
 
     public String getRestaurantName() { return restaurantName; }
     public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
+
+    public Long getTableId() { return tableId; }
+    public void setTableId(Long tableId) { this.tableId = tableId; }
 
     public LocalDateTime getBookingDate() { return bookingDate; }
     public void setBookingDate(LocalDateTime bookingDate) { this.bookingDate = bookingDate; }

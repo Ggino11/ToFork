@@ -57,4 +57,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // Find today's bookings for a restaurant
     @Query("SELECT b FROM Booking b WHERE b.restaurantId = :restaurantId AND DATE(b.bookingDate) = DATE(:today) ORDER BY b.bookingDate ASC")
     List<Booking> findTodayBookingsByRestaurant(@Param("restaurantId") Long restaurantId, @Param("today") LocalDateTime today);
+
+    // Find overlapping bookings for a specific table
+    @Query("SELECT b FROM Booking b WHERE b.tableId = :tableId " +
+           "AND b.status NOT IN ('CANCELLED', 'REJECTED') " +
+           "AND b.bookingDate < :endTime AND :startTime < DATEADD('HOUR', 2, b.bookingDate)")
+    List<Booking> findOverlappingBookings(@Param("tableId") Long tableId, 
+                                          @Param("startTime") LocalDateTime startTime, 
+                                          @Param("endTime") LocalDateTime endTime);
 }
