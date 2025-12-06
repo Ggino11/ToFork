@@ -32,6 +32,9 @@ public class Booking {
     @Column(name = "booking_date", nullable = false)
     private LocalDateTime bookingDate;
 
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
+
     @Column(name = "people_count", nullable = false)
     private Integer peopleCount;
 
@@ -109,6 +112,9 @@ public class Booking {
 
     public LocalDateTime getBookingDate() { return bookingDate; }
     public void setBookingDate(LocalDateTime bookingDate) { this.bookingDate = bookingDate; }
+
+    public LocalDateTime getEndTime() { return endTime; }
+    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
 
     public Integer getPeopleCount() { return peopleCount; }
     public void setPeopleCount(Integer peopleCount) { this.peopleCount = peopleCount; }

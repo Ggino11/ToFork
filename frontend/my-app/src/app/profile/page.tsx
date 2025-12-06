@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ProfileSidebar from '../components/ProfileSidebar';
 import UserInfo from '../components/UserInfo';
-import Payments from '../components/Payments';
+import MyBookings from '../components/MyBookings';
 import Orders from '../components/Orders';
 import { useAuth } from '../context/AuthContext';
 
 // tipo per le viste possibili nella dashboard
-type ActiveView = 'profile' | 'payments' | 'orders';
+type ActiveView = 'profile' | 'bookings' | 'orders';
 
 export default function ProfilePage() {
   const [activeView, setActiveView] = useState<ActiveView>('profile');
@@ -50,8 +50,8 @@ export default function ProfilePage() {
       case 'profile':
         // passo i dati veri al componente
         return <UserInfo user={userDataForDisplay} />;
-      case 'payments':
-        return <Payments />;
+      case 'bookings':
+        return <MyBookings />;
       case 'orders':
         return <Orders />;
       default:

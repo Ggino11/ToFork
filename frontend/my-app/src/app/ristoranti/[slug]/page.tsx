@@ -82,6 +82,7 @@ const RistoranteDettaglioContent = () => {
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedTab, setSelectedTab] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         if (slug) {
@@ -109,6 +110,10 @@ const RistoranteDettaglioContent = () => {
         if (!restaurant || !user) return;
 
         try {
+            console.log("-----------------------------------------");
+            console.log("DEBUG: Inizio procedura prenotazione");
+            console.log("DEBUG: Dettagli ricevuti:", details);
+
             // Combine date and time
             const [hours, minutes] = details.time.split(':').map(Number);
             const bookingDateTime = new Date(details.date);
@@ -116,30 +121,45 @@ const RistoranteDettaglioContent = () => {
             
             // Adjust for timezone offset
             const isoDate = new Date(bookingDateTime.getTime() - (bookingDateTime.getTimezoneOffset() * 60000)).toISOString();
+            console.log("DEBUG: Data ISO calcolata:", isoDate);
 
-            const res = await fetch('http://localhost:8085/api/bookings', {
+            // Prepare payload
+            const payload = {
+                userId: user.id,
+                restaurantId: restaurant.id,
+                restaurantName: restaurant.name,
+                bookingDate: isoDate,
+                peopleCount: details.guests,
+                specialRequests: "Prenotazione da Frontend" 
+            };
+            console.log("DEBUG: Payload richiesta:", payload);
+
+            // Create Booking directly
+            console.log("DEBUG: Invio richiesta POST a /api/bookings...");
+            const res = await fetch('http://localhost/api/bookings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    userId: user.id,
-                    restaurantId: restaurant.id,
-                    bookingDate: isoDate,
-                    peopleCount: details.guests
-                })
+                body: JSON.stringify(payload)
             });
 
+            console.log("DEBUG: Risposta status:", res.status);
             const data = await res.json();
+            console.log("DEBUG: Risposta body:", data);
 
             if (data.success) {
-                alert("Prenotazione confermata con successo! Riceverai una email di conferma.");
+                console.log("DEBUG: Prenotazione riuscita!");
+                setSuccessMessage("Richiesta di prenotazione inviata con successo! Attendi la conferma del ristoratore.");
+                // Scroll to top to see message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
+                console.error("DEBUG: Errore API:", data.message);
                 alert(`Errore prenotazione: ${data.message}`);
             }
         } catch (error) {
-            console.error("Booking failed", error);
+            console.error("DEBUG: Booking failed (Exception)", error);
             alert("Errore durante la creazione della prenotazione.");
         }
     };
@@ -169,6 +189,17 @@ const RistoranteDettaglioContent = () => {
                      style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${restaurant.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <h1 className="text-4xl md:text-5xl font-bold text-white">{restaurant.name}</h1>
             </section>
+            
+            {successMessage && (
+                <div className="mb-8 p-6 bg-green-100 border border-green-400 text-green-700 rounded-xl shadow-md flex items-center justify-between animate-in slide-in-from-top-4">
+                    <div className="flex items-center">
+                        <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span className="font-bold text-lg">{successMessage}</span>
+                    </div>
+                    <button onClick={() => setSuccessMessage('')} className="text-green-800 font-bold text-xl hover:text-green-600">&times;</button>
+                </div>
+            )}
+
             <div className="flex flex-col lg:flex-row gap-10">
                 <div className="lg:w-2/3">
                     <h2 className="text-2xl font-bold mb-4 text-gray-900">In breve</h2>

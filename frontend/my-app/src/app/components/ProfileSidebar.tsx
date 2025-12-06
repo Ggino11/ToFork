@@ -1,12 +1,13 @@
 'use client';
 
-import { FaUser, FaCreditCard, FaReceipt, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaCreditCard, FaReceipt, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 // RIMOSSO: import Link (creava conflitti)
 // RIMOSSO: import router (non serve e quello di next/router è deprecato in app dir)
 
 // Definisci i tipi per le props
-type ActiveView = 'profile' | 'payments' | 'orders';
+// Definisci i tipi per le props
+type ActiveView = 'profile' | 'bookings' | 'orders';
 
 interface ProfileSidebarProps {
   activeView: ActiveView;
@@ -15,7 +16,7 @@ interface ProfileSidebarProps {
 
 const navItems = [
   { id: 'profile', label: 'Profilo Utente', icon: FaUser },
-  { id: 'payments', label: 'Pagamenti', icon: FaCreditCard },
+  { id: 'bookings', label: 'Prenotazioni', icon: FaCalendarAlt },
   { id: 'orders', label: 'I Miei Ordini', icon: FaReceipt },
 ];
 

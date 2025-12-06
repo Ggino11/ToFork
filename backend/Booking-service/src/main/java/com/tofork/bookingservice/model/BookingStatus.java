@@ -3,6 +3,7 @@ package com.tofork.bookingservice.model;
 public enum BookingStatus {
     PENDING("In attesa"),
     CONFIRMED("Confermata"),
+    REJECTED("Rifiutata"),
     CANCELLED("Cancellata"),
     COMPLETED("Completata"),
     NO_SHOW("Mancata presentazione");

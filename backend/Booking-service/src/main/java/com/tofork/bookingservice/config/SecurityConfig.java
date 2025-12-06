@@ -67,6 +67,7 @@ public class SecurityConfig {
                 "http://localhost:8080",    // Gateway o altro servizio
                 "http://localhost:8081",    // User-Service
                 "http://localhost:8082",    // Order-Service
+                "http://localhost",         // Gateway (Port 80)
                 frontendUrl                 // URL dinamico dal configuration
         ));
 

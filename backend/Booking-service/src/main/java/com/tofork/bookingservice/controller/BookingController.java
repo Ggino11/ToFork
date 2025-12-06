@@ -1,4 +1,4 @@
- package com.tofork.bookingservice.controller;
+package com.tofork.bookingservice.controller;
 
 import com.tofork.bookingservice.dto.ApiResponse;
 import com.tofork.bookingservice.dto.CreateBookingRequest;
@@ -21,7 +21,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = "http://localhost:3000")
 public class BookingController {
 
     @Autowired
@@ -30,123 +29,62 @@ public class BookingController {
     @Autowired
     private JwtService jwtService;
 
-    /**
-     * POST /api/bookings - Crea nuova prenotazione
-     */
-    @PostMapping
-    public ResponseEntity<ApiResponse<Booking>> createBooking(
-            @RequestBody CreateBookingRequest request,
-            @RequestHeader("Authorization") String authHeader) {
-        try {
-            // Validazione token
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
-            }
-
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            // Estrai info utente dal token
-            Long tokenUserId = jwtService.getUserIdFromToken(token);
-            String userEmail = jwtService.getEmailFromToken(token);
-            String userName = jwtService.getFullNameFromToken(token);
-
-            // Verifica corrispondenza con i dati della richiesta
-            if (!tokenUserId.equals(request.getUserId())) {
-                return ResponseEntity.ok(ApiResponse.error("ID utente non corrispondente"));
-            }
-
-            // Imposta dati utente dal token (più sicuri)
-            request.setUserEmail(userEmail);
-            request.setUserName(userName);
-
-            Booking createdBooking = bookingService.createBooking(request);
-            return ResponseEntity.ok(ApiResponse.success("Prenotazione creata con successo", createdBooking));
-
-        } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante creazione prenotazione: " + e.getMessage()));
-        }
+    // Helper class for Auth Info
+    private static class AuthInfo {
+        Long userId;
+        String role;
+        String token;
     }
 
-    /**
-     * GET /api/bookings/{bookingId} - Dettagli prenotazione specifica
-     */
+    private AuthInfo validateAndExtract(String authHeader) throws Exception {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new Exception("Token non valido o assente");
+        }
+        String token = authHeader.substring(7);
+        if (!jwtService.validateToken(token)) {
+            throw new Exception("Token scaduto o non valido");
+        }
+        AuthInfo info = new AuthInfo();
+        info.token = token;
+        info.userId = jwtService.getUserIdFromToken(token);
+        info.role = jwtService.getRoleFromToken(token);
+        return info;
+    }
+
     @GetMapping("/{bookingId}")
     public ResponseEntity<ApiResponse<Booking>> getBookingById(
             @PathVariable Long bookingId,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
+            AuthInfo auth = validateAndExtract(authHeader);
+            if (!bookingService.canUserAccessBooking(bookingId, auth.userId, auth.role)) {
+                return ResponseEntity.ok(ApiResponse.error("Non autorizzato"));
             }
-
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            Long userId = jwtService.getUserIdFromToken(token);
-            String userRole = jwtService.getRoleFromToken(token);
-
-            // Verifica autorizzazione
-            if (!bookingService.canUserAccessBooking(bookingId, userId, userRole)) {
-                return ResponseEntity.ok(ApiResponse.error("Non autorizzato ad accedere a questa prenotazione"));
-            }
-
-            Booking booking = bookingService.findBookingById(bookingId);
-            return ResponseEntity.ok(ApiResponse.success("Prenotazione trovata", booking));
-
+            return ResponseEntity.ok(ApiResponse.success("Trovata", bookingService.findBookingById(bookingId)));
         } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante recupero prenotazione: " + e.getMessage()));
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
 
-    /**
-     * GET /api/bookings/user/{userId} - Storico prenotazioni utente
-     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<Booking>>> getUserBookings(
             @PathVariable Long userId,
             @RequestParam(required = false) String status,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
+            AuthInfo auth = validateAndExtract(authHeader);
+            if (!auth.userId.equals(userId) && !"ADMIN".equals(auth.role)) {
+                return ResponseEntity.ok(ApiResponse.error("Non autorizzato"));
             }
-
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            Long tokenUserId = jwtService.getUserIdFromToken(token);
-            String userRole = jwtService.getRoleFromToken(token);
-
-            // Verifica autorizzazione (utente può vedere solo le proprie prenotazioni, admin può vedere tutte)
-            if (!tokenUserId.equals(userId) && !"ADMIN".equals(userRole)) {
-                return ResponseEntity.ok(ApiResponse.error("Non autorizzato a vedere le prenotazioni di questo utente"));
-            }
-
-            List<Booking> bookings;
-            if (status != null && !status.trim().isEmpty()) {
-                BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
-                bookings = bookingService.getUserBookingsByStatus(userId, bookingStatus);
-            } else {
-                bookings = bookingService.getUserBookings(userId);
-            }
-
-            return ResponseEntity.ok(ApiResponse.success("Prenotazioni utente recuperate", bookings));
-
+            List<Booking> list = (status != null && !status.isEmpty()) 
+                ? bookingService.getUserBookingsByStatus(userId, BookingStatus.valueOf(status.toUpperCase())) 
+                : bookingService.getUserBookings(userId);
+            return ResponseEntity.ok(ApiResponse.success("OK", list));
         } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante recupero prenotazioni utente: " + e.getMessage()));
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
 
-    /**
-     * GET /api/bookings/restaurant/{restaurantId} - Prenotazioni del ristorante
-     */
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<ApiResponse<List<Booking>>> getRestaurantBookings(
             @PathVariable Long restaurantId,
@@ -155,161 +93,98 @@ public class BookingController {
             @RequestParam(required = false) String endDate,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
+            AuthInfo auth = validateAndExtract(authHeader);
+            if (!"RESTAURANT_OWNER".equals(auth.role) && !"ADMIN".equals(auth.role)) {
+                return ResponseEntity.ok(ApiResponse.error("Accesso negato"));
             }
 
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            String userRole = jwtService.getRoleFromToken(token);
-
-            // Solo ristoratori e admin possono vedere prenotazioni di ristoranti
-            if (!"RESTAURANT_OWNER".equals(userRole) && !"ADMIN".equals(userRole)) {
-                return ResponseEntity.ok(ApiResponse.error("Non autorizzato a vedere prenotazioni del ristorante"));
-            }
-
-            List<Booking> bookings;
-
-            // Filtra per date se specificate
+            List<Booking> list;
             if (startDate != null && endDate != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-                LocalDateTime start = LocalDateTime.parse(startDate, formatter);
-                LocalDateTime end = LocalDateTime.parse(endDate, formatter);
-                bookings = bookingService.getRestaurantBookingsByDateRange(restaurantId, start, end);
+                list = bookingService.getRestaurantBookingsByDateRange(restaurantId, 
+                    LocalDateTime.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                    LocalDateTime.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            } else if (status != null && !status.isEmpty()) {
+                list = bookingService.getRestaurantBookingsByStatus(restaurantId, BookingStatus.valueOf(status.toUpperCase()));
+            } else {
+                list = bookingService.getRestaurantBookings(restaurantId);
             }
-            // Filtra per stato se specificato
-            else if (status != null && !status.trim().isEmpty()) {
-                BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
-                bookings = bookingService.getRestaurantBookingsByStatus(restaurantId, bookingStatus);
-            }
-            // Tutte le prenotazioni del ristorante
-            else {
-                bookings = bookingService.getRestaurantBookings(restaurantId);
-            }
-
-            return ResponseEntity.ok(ApiResponse.success("Prenotazioni ristorante recuperate", bookings));
-
+            return ResponseEntity.ok(ApiResponse.success("OK", list));
         } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante recupero prenotazioni ristorante: " + e.getMessage()));
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
 
-    /**
-     * GET /api/bookings/restaurant/{restaurantId}/today - Prenotazioni di oggi per il ristorante
-     */
     @GetMapping("/restaurant/{restaurantId}/today")
     public ResponseEntity<ApiResponse<List<Booking>>> getTodayRestaurantBookings(
             @PathVariable Long restaurantId,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
-            }
-
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            String userRole = jwtService.getRoleFromToken(token);
-
-            // Solo ristoratori e admin possono vedere prenotazioni
-            if (!"RESTAURANT_OWNER".equals(userRole) && !"ADMIN".equals(userRole)) {
-                return ResponseEntity.ok(ApiResponse.error("Non autorizzato a vedere prenotazioni del ristorante"));
-            }
-
-            List<Booking> bookings = bookingService.getTodayRestaurantBookings(restaurantId);
-            return ResponseEntity.ok(ApiResponse.success("Prenotazioni di oggi recuperate", bookings));
-
+            AuthInfo auth = validateAndExtract(authHeader);
+            if (!"RESTAURANT_OWNER".equals(auth.role) && !"ADMIN".equals(auth.role)) return ResponseEntity.ok(ApiResponse.error("Accesso negato"));
+            return ResponseEntity.ok(ApiResponse.success("OK", bookingService.getTodayRestaurantBookings(restaurantId)));
         } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante recupero prenotazioni di oggi: " + e.getMessage()));
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
 
-    /**
-     * PUT /api/bookings/{bookingId} - Aggiorna prenotazione
-     */
     @PutMapping("/{bookingId}")
     public ResponseEntity<ApiResponse<Booking>> updateBooking(
             @PathVariable Long bookingId,
             @RequestBody UpdateBookingRequest request,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
-            }
-
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            Long userId = jwtService.getUserIdFromToken(token);
-            String userRole = jwtService.getRoleFromToken(token);
-
-            Booking updatedBooking = bookingService.updateBooking(bookingId, request, userId, userRole);
-            return ResponseEntity.ok(ApiResponse.success("Prenotazione aggiornata", updatedBooking));
-
+            AuthInfo auth = validateAndExtract(authHeader);
+            return ResponseEntity.ok(ApiResponse.success("Aggiornato", bookingService.updateBooking(bookingId, request, auth.userId, auth.role)));
         } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante aggiornamento prenotazione: " + e.getMessage()));
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
 
-    /**
-     * PUT /api/bookings/{bookingId}/cancel - Cancella prenotazione
-     */
+    @PutMapping("/{bookingId}/status")
+    public ResponseEntity<ApiResponse<Booking>> updateBookingStatus(
+            @PathVariable Long bookingId,
+            @RequestBody Map<String, String> statusUpdate,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            AuthInfo auth = validateAndExtract(authHeader);
+            String status = statusUpdate.get("status");
+            if (status == null) return ResponseEntity.ok(ApiResponse.error("Status mancante"));
+            
+            UpdateBookingRequest req = new UpdateBookingRequest();
+            req.setStatus(BookingStatus.valueOf(status.toUpperCase()));
+            return ResponseEntity.ok(ApiResponse.success("Stato aggiornato", bookingService.updateBooking(bookingId, req, auth.userId, auth.role)));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     @PutMapping("/{bookingId}/cancel")
     public ResponseEntity<ApiResponse<Object>> cancelBooking(
             @PathVariable Long bookingId,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            if (!isValidAuthHeader(authHeader)) {
-                return ResponseEntity.ok(ApiResponse.error("Token non valido"));
-            }
-
-            String token = extractToken(authHeader);
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.ok(ApiResponse.error("Token scaduto o non valido"));
-            }
-
-            Long userId = jwtService.getUserIdFromToken(token);
-
-            bookingService.cancelBooking(bookingId, userId);
-            return ResponseEntity.ok(ApiResponse.success("Prenotazione cancellata con successo", null));
-
+            AuthInfo auth = validateAndExtract(authHeader);
+            bookingService.cancelBooking(bookingId, auth.userId);
+            return ResponseEntity.ok(ApiResponse.success("Cancellata", null));
         } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante cancellazione prenotazione: " + e.getMessage()));
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
 
-    // Helper methods
-    private boolean isValidAuthHeader(String authHeader) {
-        return authHeader != null && authHeader.startsWith("Bearer ");
-    }
-
-    private String extractToken(String authHeader) {
-        return authHeader.substring(7);
-    }
-
-    /**
-     * GET /api/bookings/check-availability
-     */
-    @GetMapping("/check-availability")
-    public ResponseEntity<ApiResponse<Boolean>> checkAvailability(
-            @RequestParam Long restaurantId,
-            @RequestParam String date,
-            @RequestParam Integer peopleCount) {
+    @PostMapping
+    public ResponseEntity<ApiResponse<Booking>> createBooking(
+            @RequestBody CreateBookingRequest request,
+            @RequestHeader("Authorization") String authHeader) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-            LocalDateTime bookingDate = LocalDateTime.parse(date, formatter);
+            AuthInfo auth = validateAndExtract(authHeader);
+            if (!auth.userId.equals(request.getUserId())) return ResponseEntity.ok(ApiResponse.error("User ID mismatch"));
             
-            boolean available = bookingService.checkAvailability(restaurantId, bookingDate, peopleCount);
-            return ResponseEntity.ok(ApiResponse.success("Verifica disponibilità completata", available));
+            request.setUserEmail(jwtService.getEmailFromToken(auth.token));
+            request.setUserName(jwtService.getFullNameFromToken(auth.token));
+            
+            return ResponseEntity.ok(ApiResponse.success("Creata", bookingService.createBooking(request)));
         } catch (Exception e) {
-            return ResponseEntity.ok(ApiResponse.error("Errore durante verifica disponibilità: " + e.getMessage()));
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
 }

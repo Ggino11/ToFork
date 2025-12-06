@@ -13,6 +13,9 @@ public class CreateBookingRequest {
     private String phoneNumber;
     private String specialRequests;
 
+    private Long tableId;
+    private LocalDateTime endTime;
+
     public CreateBookingRequest() {}
 
     // Validation methods
@@ -57,4 +60,10 @@ public class CreateBookingRequest {
 
     public String getSpecialRequests() { return specialRequests; }
     public void setSpecialRequests(String specialRequests) { this.specialRequests = specialRequests; }
+
+    public Long getTableId() { return tableId; }
+    public void setTableId(Long tableId) { this.tableId = tableId; }
+
+    public LocalDateTime getEndTime() { return endTime; }
+    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
 }

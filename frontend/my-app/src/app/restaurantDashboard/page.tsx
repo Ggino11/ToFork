@@ -2,12 +2,13 @@
 import  { useState, useEffect } from 'react';
 import RestaurantSidebar, { View } from '../components/RestaurantSidebar';
 import Orders from '../components/Orders';
-import TavoliComponent from '../components/Table';
+import RestaurantBookings from '../components/RestaurantBookings';
 import MenuComponent from '../components/MenuComponent';
 import ProfileComponent from '../components/ProfileComponent';
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { CartProvider } from '../context/CartContext';
 
 const Page = () => {
   const [activeView, setActiveView] = useState<View>('ordini');
@@ -37,8 +38,8 @@ const Page = () => {
     switch (activeView) {
       case 'ordini':
         return <Orders />;
-      case 'tavoli':
-        return <TavoliComponent />;
+      case 'prenotazioni':
+        return <RestaurantBookings />;
       case 'menu':
         return <MenuComponent />;
       case 'profile':
@@ -49,16 +50,17 @@ const Page = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <RestaurantSidebar activeView={activeView} setActiveView={setActiveView} />
+    <CartProvider>
+        <div className="flex min-h-screen bg-gray-50">
+        {/* Sidebar */}
+        <RestaurantSidebar activeView={activeView} setActiveView={setActiveView} />
 
-      {/* Contenuto principale */}
-      {/* Contenuto principale */}
-      <main className="flex-1 md:ml-64 p-4 md:p-8 mt-16 md:mt-0">
-        {renderView()}
-      </main>
-    </div>
+        {/* Contenuto principale */}
+        <main className="flex-1 md:ml-64 p-4 md:p-8 mt-16 md:mt-0">
+            {renderView()}
+        </main>
+        </div>
+    </CartProvider>
   );
 };
 

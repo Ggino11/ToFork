@@ -7,7 +7,6 @@ import com.tofork.bookingservice.model.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 public interface BookingService {
 
@@ -71,8 +70,4 @@ public interface BookingService {
      */
     boolean canRestaurantAccessBooking(Long bookingId, Long restaurantId) throws Exception;
 
-    /**
-     * Verifica disponibilità per una prenotazione
-     */
-    boolean checkAvailability(Long restaurantId, LocalDateTime date, Integer peopleCount);
 }

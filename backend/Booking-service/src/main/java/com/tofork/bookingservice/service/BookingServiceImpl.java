@@ -18,48 +18,9 @@ public class BookingServiceImpl implements BookingService {
     @Autowired
     private BookingRepository bookingRepository;
 
-    @Override
-    @Transactional
-    public Booking createBooking(CreateBookingRequest request) throws Exception {
-        // Validazione input
-        if (!request.isValid()) {
-            throw new Exception("Dati prenotazione non validi");
-        }
 
-        if (!request.isBookingInFuture()) {
-            throw new Exception("La prenotazione deve essere nel futuro");
-        }
 
-        // Verifica che non ci sia già una prenotazione per lo stesso utente, ristorante e data
-        Optional<Booking> existingBooking = bookingRepository.findByUserIdAndRestaurantIdAndBookingDateAndStatus(
-                request.getUserId(), request.getRestaurantId(), request.getBookingDate(), BookingStatus.CONFIRMED);
 
-        if (existingBooking.isPresent()) {
-            throw new Exception("Hai già una prenotazione confermata per questo ristorante in questa data");
-        }
-
-        // Trova un tavolo disponibile
-        Long tableId = findAvailableTable(request.getRestaurantId(), request.getBookingDate(), request.getPeopleCount());
-        if (tableId == null) {
-            throw new Exception("Nessun tavolo disponibile per la data e il numero di persone selezionati");
-        }
-
-        // Crea prenotazione
-        Booking booking = new Booking();
-        booking.setUserId(request.getUserId());
-        booking.setUserEmail(request.getUserEmail());
-        booking.setUserName(request.getUserName());
-        booking.setRestaurantId(request.getRestaurantId());
-        booking.setRestaurantName(request.getRestaurantName());
-        booking.setBookingDate(request.getBookingDate());
-        booking.setPeopleCount(request.getPeopleCount());
-        booking.setPhoneNumber(request.getPhoneNumber());
-        booking.setSpecialRequests(request.getSpecialRequests());
-        booking.setTableId(tableId);
-        booking.setStatus(BookingStatus.PENDING);
-
-        return bookingRepository.save(booking);
-    }
 
     @Override
     public Booking findBookingById(Long bookingId) throws Exception {
@@ -164,7 +125,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getTodayRestaurantBookings(Long restaurantId) {
-        return bookingRepository.findTodayBookingsByRestaurant(restaurantId, LocalDateTime.now());
+        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime endOfDay = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
+        return bookingRepository.findByRestaurantIdAndBookingDateBetweenOrderByBookingDateAsc(restaurantId, startOfDay, endOfDay);
     }
 
     @Override
@@ -183,67 +146,36 @@ public class BookingServiceImpl implements BookingService {
         return booking.getRestaurantId().equals(restaurantId);
     }
 
-    @Autowired
-    private org.springframework.web.client.RestTemplate restTemplate;
-
     @Override
-    public boolean checkAvailability(Long restaurantId, LocalDateTime date, Integer peopleCount) {
-        try {
-            // 1. Fetch tables from Restaurant-service
-            String url = "http://restaurant-service:8083/api/restaurants/" + restaurantId + "/tables";
-            org.springframework.core.ParameterizedTypeReference<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> responseType = 
-                new org.springframework.core.ParameterizedTypeReference<>() {};
-            org.springframework.http.ResponseEntity<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> response = 
-                restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, null, responseType);
-            
-            List<com.tofork.bookingservice.dto.RestaurantTableDTO> tables = response.getBody();
-
-            if (tables == null || tables.isEmpty()) {
-                return false;
-            }
-
-            // 2. Find a suitable table
-            for (com.tofork.bookingservice.dto.RestaurantTableDTO table : tables) {
-                if (table.getSeats() >= peopleCount) {
-                    // Check for overlaps
-                    List<Booking> overlaps = bookingRepository.findOverlappingBookings(table.getId(), date, date.plusHours(2));
-                    if (overlaps.isEmpty()) {
-                        return true; // Found a table!
-                    }
-                }
-            }
-            
-            return false; // No table found
-
-        } catch (Exception e) {
-            System.err.println("Error checking availability: " + e.getMessage());
-            return false;
+    @Transactional
+    public Booking createBooking(CreateBookingRequest request) throws Exception {
+        // Validazione input
+        if (!request.isValid()) {
+            throw new Exception("Dati prenotazione non validi");
         }
+
+        if (!request.isBookingInFuture()) {
+            throw new Exception("La prenotazione deve essere nel futuro");
+        }
+
+        LocalDateTime startTime = request.getBookingDate();
+        LocalDateTime endTime = request.getEndTime() != null ? request.getEndTime() : startTime.plusHours(2);
+
+        // Crea prenotazione
+        Booking booking = new Booking();
+        booking.setUserId(request.getUserId());
+        booking.setUserEmail(request.getUserEmail());
+        booking.setUserName(request.getUserName());
+        booking.setRestaurantId(request.getRestaurantId());
+        booking.setRestaurantName(request.getRestaurantName());
+        booking.setBookingDate(startTime);
+        booking.setEndTime(endTime);
+        booking.setPeopleCount(request.getPeopleCount());
+        booking.setPhoneNumber(request.getPhoneNumber());
+        booking.setSpecialRequests(request.getSpecialRequests());
+        booking.setStatus(BookingStatus.PENDING); // Default to PENDING
+
+        return bookingRepository.save(booking);
     }
 
-    private Long findAvailableTable(Long restaurantId, LocalDateTime date, Integer peopleCount) {
-        try {
-            String url = "http://restaurant-service:8083/api/restaurants/" + restaurantId + "/tables";
-            org.springframework.core.ParameterizedTypeReference<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> responseType = 
-                new org.springframework.core.ParameterizedTypeReference<>() {};
-            org.springframework.http.ResponseEntity<List<com.tofork.bookingservice.dto.RestaurantTableDTO>> response = 
-                restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, null, responseType);
-            
-            List<com.tofork.bookingservice.dto.RestaurantTableDTO> tables = response.getBody();
-
-            if (tables != null) {
-                for (com.tofork.bookingservice.dto.RestaurantTableDTO table : tables) {
-                    if (table.getSeats() >= peopleCount) {
-                        List<Booking> overlaps = bookingRepository.findOverlappingBookings(table.getId(), date, date.plusHours(2));
-                        if (overlaps.isEmpty()) {
-                            return table.getId();
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error finding table: " + e.getMessage());
-        }
-        return null;
-    }
 }

@@ -1,10 +1,10 @@
 'use client';
 import React, { FC, useState } from 'react';
 import Image from 'next/image';
-import { ClipboardList, CalendarDays, BookOpen, LogOut, User, Menu, X } from 'lucide-react';
+import { ClipboardList, CalendarCheck, BookOpen, LogOut, User, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export type View = 'ordini' | 'tavoli' | 'menu' | 'profile';
+export type View = 'ordini' | 'prenotazioni' | 'menu' | 'profile';
 
 interface RestaurantSidebarProps {
   activeView: View;
@@ -17,7 +17,7 @@ const RestaurantSidebar: FC<RestaurantSidebarProps> = ({ activeView, setActiveVi
 
   const navItems = [
     { id: 'ordini', label: 'Ordini', icon: ClipboardList },
-    { id: 'tavoli', label: 'Tavoli', icon: CalendarDays },
+    { id: 'prenotazioni', label: 'Prenotazioni', icon: CalendarCheck },
     { id: 'menu', label: 'Menu', icon: BookOpen },
     { id: 'profile', label: 'Profilo', icon: User },
   ];
