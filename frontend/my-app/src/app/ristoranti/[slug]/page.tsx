@@ -33,7 +33,7 @@ import { ShoppingCart, Trash2 } from 'lucide-react';
 
 const CartSummary = () => {
     const { items, total, checkout, removeItem } = useCart();
-    
+
     if (items.length === 0) return null;
 
     return (
@@ -52,7 +52,7 @@ const CartSummary = () => {
                             <span className="text-gray-600 truncate">{item.quantity}x {item.title}</span>
                             <span className="font-semibold">€{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
-                        <button 
+                        <button
                             onClick={() => removeItem(item.id)}
                             className="text-gray-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Rimuovi"
@@ -66,8 +66,8 @@ const CartSummary = () => {
                 <span>Totale</span>
                 <span className="text-orange-600">€{total.toFixed(2)}</span>
             </div>
-            <button 
-                onClick={checkout}  
+            <button
+                onClick={checkout}
                 className="w-full bg-orange-600 text-white font-bold py-2 rounded-xl hover:bg-orange-700 transition-colors shadow-md"
             >
                 Completa Ordine
@@ -84,9 +84,11 @@ const RistoranteDettaglioContent = () => {
     const [selectedTab, setSelectedTab] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://tofork.local';
+
     useEffect(() => {
         if (slug) {
-            fetch(`http://localhost:8083/api/restaurants/slug/${slug}`)
+            fetch(`${baseUrl}/api/restaurants/slug/${slug}`)
                 .then(res => {
                     if (!res.ok) throw new Error('Restaurant not found');
                     return res.json();
@@ -118,7 +120,7 @@ const RistoranteDettaglioContent = () => {
             const [hours, minutes] = details.time.split(':').map(Number);
             const bookingDateTime = new Date(details.date);
             bookingDateTime.setHours(hours, minutes, 0, 0);
-            
+
             // Adjust for timezone offset
             const isoDate = new Date(bookingDateTime.getTime() - (bookingDateTime.getTimezoneOffset() * 60000)).toISOString();
             console.log("DEBUG: Data ISO calcolata:", isoDate);
@@ -130,13 +132,13 @@ const RistoranteDettaglioContent = () => {
                 restaurantName: restaurant.name,
                 bookingDate: isoDate,
                 peopleCount: details.guests,
-                specialRequests: "Prenotazione da Frontend" 
+                specialRequests: "Prenotazione da Frontend"
             };
             console.log("DEBUG: Payload richiesta:", payload);
 
             // Create Booking directly
             console.log("DEBUG: Invio richiesta POST a /api/bookings...");
-            const res = await fetch('http://localhost/api/bookings', {
+            const res = await fetch(`${baseUrl}/api/bookings`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -189,7 +191,7 @@ const RistoranteDettaglioContent = () => {
                      style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${restaurant.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <h1 className="text-4xl md:text-5xl font-bold text-white">{restaurant.name}</h1>
             </section>
-            
+
             {successMessage && (
                 <div className="mb-8 p-6 bg-green-100 border border-green-400 text-green-700 rounded-xl shadow-md flex items-center justify-between animate-in slide-in-from-top-4">
                     <div className="flex items-center">
@@ -204,7 +206,7 @@ const RistoranteDettaglioContent = () => {
                 <div className="lg:w-2/3">
                     <h2 className="text-2xl font-bold mb-4 text-gray-900">In breve</h2>
                     <p className="text-gray-700 mb-6">{restaurant.description}</p>
-                    
+
                     {restaurant.highlights && restaurant.highlights.length > 0 && (
                         <ul className="list-disc ml-6 text-gray-700 space-y-2 mb-6">
                             {restaurant.highlights.map((h, i) => (
@@ -212,7 +214,7 @@ const RistoranteDettaglioContent = () => {
                             ))}
                         </ul>
                     )}
-                    
+
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">Info</h3>
                     <p className="text-gray-700 mb-1"><strong>Indirizzo:</strong> {restaurant.address}</p>
                     <p className="text-gray-700 mb-1"><strong>Prezzo medio:</strong> {restaurant.averagePrice ?? 12}€</p>
@@ -222,7 +224,7 @@ const RistoranteDettaglioContent = () => {
                     <CalendarBooking restaurantId={restaurant.id} onBookingSubmit={handleBookingSubmit} />
                 </div>
             </div>
-            
+
             {categories.length > 0 && (
                 <section className="mt-16">
                     <h2 className="text-2xl font-bold mb-4 text-gray-900">Se vuoi puoi già preordinare i tuoi piatti!</h2>

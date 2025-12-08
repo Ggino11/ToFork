@@ -31,8 +31,8 @@ export default function MapComponent() {
 
     useEffect(() => {
         fixLeafletIcon();
-
-        fetch('http://localhost:8083/api/restaurants')
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost';
+        fetch(`${baseUrl}/api/restaurants`)
             .then(res => res.json())
             .then(async (data: any[]) => {
                 // 1. Map initial data

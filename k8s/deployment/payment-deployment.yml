@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: tofork
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: tofork/payment-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SERVER_PORT
+              value: "8084"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/tofork?currentSchema=payment_service"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom: { secretKeyRef: { name: postgres-secret, key: POSTGRES_USER } }
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom: { secretKeyRef: { name: postgres-secret, key: POSTGRES_PASSWORD } }
+            - name: JWT_SECRET
+              value: "mySecretKeyWhichIsLongEnoughForHS256"
+            # Metti qui le chiavi vere se vuoi testare Stripe, o lascia placeholder
+            - name: STRIPE_SECRET_KEY
+              value: "sk_test_placeholder"
+            - name: STRIPE_PUBLISHABLE_KEY
+              value: "pk_test_placeholder"

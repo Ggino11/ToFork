@@ -23,9 +23,10 @@ const TavoliComponent: FC = () => {
     capacity: ''
   });
 
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost';
   useEffect(() => {
     if (user?.id) {
-        fetch(`http://localhost:8083/api/restaurants/owner/${user.id}`, {
+        fetch(`${baseUrl}/api/restaurants/owner/${user.id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
@@ -45,7 +46,7 @@ const TavoliComponent: FC = () => {
 
   useEffect(() => {
     if (restaurantId) {
-      fetch(`http://localhost:8083/api/tables/restaurant/${restaurantId}`, {
+      fetch(`${baseUrl}/api/tables/restaurant/${restaurantId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -60,7 +61,7 @@ const TavoliComponent: FC = () => {
     if (!restaurantId) return;
 
     try {
-      const res = await fetch(`http://localhost:8083/api/tables/restaurant/${restaurantId}`, {
+      const res = await fetch(`${baseUrl}/api/tables/restaurant/${restaurantId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +90,7 @@ const TavoliComponent: FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:8083/api/tables/${id}`, {
+      const res = await fetch(`${baseUrl}/api/tables/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

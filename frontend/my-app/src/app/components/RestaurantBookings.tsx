@@ -31,7 +31,8 @@ const RestaurantBookings = () => {
     const fetchRestaurantId = async () => {
         try {
             // Assuming endpoint to get owner's restaurant
-            const res = await fetch(`http://localhost:8083/api/restaurants/owner/${user?.id}`, {
+            const baseUrl = process.env.NEXT_PUBLIC_RESTAURANT_SERVICE_URL || "http://localhost/api/restaurants";
+            const res = await fetch(`${baseUrl}/owner/${user?.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();

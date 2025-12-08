@@ -1,0 +1,75 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tofork-ingress
+  namespace: tofork
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: localhost
+      http:
+        paths:
+          # --- FRONTEND ---
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: frontend, port: { number: 3000 } } }
+
+          # --- API BACKEND (Nessun Rewrite) ---
+          - path: /api/restaurants
+            pathType: Prefix
+            backend: { service: { name: restaurant-service, port: { number: 8083 } } }
+          - path: /api/bookings
+            pathType: Prefix
+            backend: { service: { name: booking-service, port: { number: 8085 } } }
+          - path: /api/orders
+            pathType: Prefix
+            backend: { service: { name: order-service, port: { number: 8082 } } }
+          - path: /api/payments
+            pathType: Prefix
+            backend: { service: { name: payment-service, port: { number: 8084 } } }
+
+          # --- AUTHENTICATION (User Service) ---
+          # Gestione login Google e API Utenti
+          - path: /api/users
+            pathType: Prefix
+            backend: { service: { name: user-service, port: { number: 8081 } } }
+          - path: /oauth2
+            pathType: Prefix
+            backend: { service: { name: user-service, port: { number: 8081 } } }
+          - path: /login/oauth2
+            pathType: Prefix
+            backend: { service: { name: user-service, port: { number: 8081 } } }
+
+---
+
+# ---------------------------------------------------------
+# 2. INGRESS SPECIALE PER AUTH (Con Rewrite)
+# Gestisce SOLO /api/auth riscrivendolo per il backend
+# ---------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-auth-rewrite
+  namespace: tofork
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # Questo rewrite trasforma "/api/auth/login" in "/auth/login"
+    # (Uso /auth/$2 per sicurezza, così il backend riceve il prefisso /auth)
+    nginx.ingress.kubernetes.io/rewrite-target: /auth/$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: localhost
+      http:
+        paths:
+          # Intercetta tutto ciò che inizia con /api/auth
+          - path: /api/auth(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8081

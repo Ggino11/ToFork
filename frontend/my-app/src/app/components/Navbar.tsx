@@ -12,6 +12,9 @@ export default function Navbar() {
     const pathname = usePathname();
     const { isAuthenticated, user } = useAuth();
 
+    const isRistoranti = pathname.startsWith('/ristoranti');
+    const isHome = pathname === '/' || pathname === '';
+
     return (
         <nav className="fixed w-full z-50 bg-white shadow-md px-6 py-1 flex items-center">
             {/* Logo */}

@@ -25,8 +25,9 @@ const MyBookings = () => {
 
     const fetchMyBookings = async () => {
         try {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost';
             // Using Port 80 (Gateway)
-            const res = await fetch(`http://localhost/api/bookings/user/${user?.id}`, {
+            const res = await fetch(`${baseUrl}/api/bookings/user/${user?.id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

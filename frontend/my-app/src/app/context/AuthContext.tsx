@@ -67,10 +67,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Funzione logout
     const logout = () => {
         console.log(' Logout chiamato');
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
 
         // Chiamata API logout (opzionale)
         if (token) {
-            fetch("http://localhost:8081/auth/logout", {
+            fetch(`${baseUrl}/auth/logout`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`

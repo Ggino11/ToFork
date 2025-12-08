@@ -40,7 +40,8 @@ const ProfileComponent = () => {
 
     useEffect(() => {
         if (user?.id) {
-            fetch(`http://localhost:8083/api/restaurants/owner/${user.id}`, {
+            const baseUrl = process.env.NEXT_PUBLIC_RESTAURANT_SERVICE_URL || "http://localhost/api/restaurants";
+            fetch(`${baseUrl}/owner/${user.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             .then(res => res.json())
@@ -105,7 +106,8 @@ const ProfileComponent = () => {
         if (!restaurant) return;
 
         try {
-            const res = await fetch(`http://localhost:8083/api/restaurants/${restaurant.id}`, {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost';
+            const res = await fetch(`${baseUrl}/api/restaurants/${restaurant.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

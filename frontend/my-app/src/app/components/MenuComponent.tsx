@@ -38,7 +38,8 @@ const MenuComponent: FC = () => {
 
   useEffect(() => {
     if (user?.id) {
-        fetch(`http://localhost:8083/api/restaurants/owner/${user.id}`, {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
+        fetch(`${API_BASE_URL}/api/restaurants/owner/${user.id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())

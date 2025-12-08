@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restaurant-service
+  namespace: tofork
+  labels:
+    app: restaurant-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: restaurant-service
+  template:
+    metadata:
+      labels:
+        app: restaurant-service
+    spec:
+      containers:
+      - name: restaurant-service
+        image: tofork/restaurant-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8083
+        env:
+        - name: SERVER_PORT
+          value: "8083"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres:5432/tofork"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: SPRING_RABBITMQ_HOST
+          value: "rabbitmq"
+        - name: SPRING_RABBITMQ_PORT
+          value: "5672"
+        - name: SPRING_RABBITMQ_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: RABBITMQ_DEFAULT_USER
+        - name: SPRING_RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: RABBITMQ_DEFAULT_PASS
+        - name: RABBITMQ_EXCHANGE
+          value: "tofork.exchange"
+        - name: RABBITMQ_BOOKING_QUEUE
+          value: "booking.queue"
+        - name: RABBITMQ_ORDER_QUEUE
+          value: "order.queue"
+        - name: RABBITMQ_PAYMENT_QUEUE
+          value: "payment.queue"
+        - name: USER_SERVICE_URL
+          value: "http://user-service:8081"
+        - name: ORDER_SERVICE_URL
+          value: "http://order-service:8082"
+        - name: BOOKING_SERVICE_URL
+          value: "http://booking-service:8085"
+        - name: PAYMENT_SERVICE_URL
+          value: "http://payment-service:8084"
+        - name: RESTAURANT_SERVICE_URL
+          value: "http://restaurant-service:8083"
