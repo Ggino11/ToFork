@@ -10,7 +10,7 @@ interface Booking {
     bookingDate: string;
     peopleCount: number;
     status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';
-    specialRequests?: string;
+
     phoneNumber?: string;
 }
 
@@ -172,12 +172,7 @@ const RestaurantBookings = () => {
                                             {booking.peopleCount} persone
                                         </div>
                                     </div>
-                                    {booking.specialRequests && (
-                                        <div className="bg-yellow-50 text-yellow-800 text-sm p-2 rounded-lg flex items-start border border-yellow-200 mt-2">
-                                            <MessageSquare className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                                            "{booking.specialRequests}"
-                                        </div>
-                                    )}
+
                                 </div>
                                 
                                 <div className="flex items-center gap-3">

@@ -1,8 +1,7 @@
 package com.tofork.orderservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "order_items")
@@ -12,122 +11,46 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    @JsonBackReference
     private Order order;
 
-    @Column(name = "food_item_name", nullable = false)
-    private String foodItemName;
+    private Long menuItemId;
 
-    @Column(name = "food_item_id")
-    private Long foodItemId;
+    private String name;
 
-    @Column(name = "quantity", nullable = false)
+    private Double unitPrice;
+
     private Integer quantity;
 
-    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal unitPrice;
-
-    @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalPrice;
-
-    @Column(name = "special_requests", length = 500)
+    private Double subtotal;
+    
     private String specialRequests;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        // Calcola automaticamente il prezzo totale
-        if (unitPrice != null && quantity != null) {
-            totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
-        }
-    }
-
-    // Constructors
     public OrderItem() {}
 
-    public OrderItem(String foodItemName, Long foodItemId, Integer quantity,
-                     BigDecimal unitPrice, String specialRequests) {
-        this.foodItemName = foodItemName;
-        this.foodItemId = foodItemId;
-        this.quantity = quantity;
-        this.unitPrice = unitPrice;
-        this.specialRequests = specialRequests;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Order getOrder() { return order; }
+    public void setOrder(Order order) { this.order = order; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getMenuItemId() { return menuItemId; }
+    public void setMenuItemId(Long menuItemId) { this.menuItemId = menuItemId; }
 
-    public Order getOrder() {
-        return order;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setOrder(Order order) {
-        this.order = order;
-    }
+    public Double getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(Double unitPrice) { this.unitPrice = unitPrice; }
 
-    public String getFoodItemName() {
-        return foodItemName;
-    }
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-    public void setFoodItemName(String foodItemName) {
-        this.foodItemName = foodItemName;
-    }
-
-    public Long getFoodItemId() {
-        return foodItemId;
-    }
-
-    public void setFoodItemId(Long foodItemId) {
-        this.foodItemId = foodItemId;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public String getSpecialRequests() {
-        return specialRequests;
-    }
-
-    public void setSpecialRequests(String specialRequests) {
-        this.specialRequests = specialRequests;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public Double getSubtotal() { return subtotal; }
+    public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+    
+    public String getSpecialRequests() { return specialRequests; }
+    public void setSpecialRequests(String specialRequests) { this.specialRequests = specialRequests; }
 }

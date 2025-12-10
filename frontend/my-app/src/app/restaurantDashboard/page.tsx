@@ -1,7 +1,7 @@
 'use client';
 import  { useState, useEffect } from 'react';
 import RestaurantSidebar, { View } from '../components/RestaurantSidebar';
-import Orders from '../components/Orders';
+import RestaurantOrders from '../components/RestaurantOrders';
 import RestaurantBookings from '../components/RestaurantBookings';
 import MenuComponent from '../components/MenuComponent';
 import ProfileComponent from '../components/ProfileComponent';
@@ -37,7 +37,7 @@ const Page = () => {
   const renderView = () => {
     switch (activeView) {
       case 'ordini':
-        return <Orders />;
+        return <RestaurantOrders />;
       case 'prenotazioni':
         return <RestaurantBookings />;
       case 'menu':
@@ -45,7 +45,7 @@ const Page = () => {
       case 'profile':
         return <ProfileComponent />;
       default:
-        return <Orders />;
+        return <RestaurantOrders />;
     }
   };
 

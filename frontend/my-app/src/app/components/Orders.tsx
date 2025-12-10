@@ -1,24 +1,126 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
-/**
- * Componente per visualizzare la gestione degli ordini nel restaurant dashboard
- */
-const Orders: FC = () => (
-  <div className="bg-white p-6 rounded-lg shadow-md">
-    <h3 className="text-xl font-semibold mb-4 text-gray-900">Ordini Recenti</h3>
-    <p className="text-gray-600">Qui verranno visualizzati gli ordini in tempo reale...</p>
-    {/* Esempio di griglia placeholder con animazione pulse per dare l'idea del caricamento */}
-    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="p-4 border border-gray-200 rounded-lg animate-pulse bg-gray-50">
-          <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-3 bg-gray-200 rounded w-full"></div>
-          <div className="h-3 bg-gray-200 rounded w-full mt-1"></div>
+interface OrderItem {
+    id: number;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+interface Order {
+    id: number;
+    bookingId: number;
+    restaurantId: number;
+    status: string;
+    totalAmount: number;
+    createdAt: string;
+    items: OrderItem[];
+    paid: boolean;
+    orderType: 'DINE_IN' | 'TAKEAWAY';
+}
+
+const Orders: FC = () => {
+    const { token } = useAuth();
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!token) return;
+
+        const fetchOrders = async () => {
+            try {
+                const res = await fetch('http://localhost/api/orders/user/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setOrders(data.data);
+                }
+            } catch (err) {
+                console.error("Error fetching orders", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, [token]);
+    
+    const handlePay = (orderId: number, amount: number) => {
+        alert("Verrai reindirizzato al pagamento (Mock)");
+        // In future: Redirect to payment service
+        // window.location.href = ...
+    };
+
+    if (loading) return <div className="p-4">Caricamento ordini...</div>;
+
+    return (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900">I miei Ordini</h3>
+            {orders.length === 0 ? (
+                <p className="text-gray-500">Nessun ordine effettuato.</p>
+            ) : (
+                <div className="grid gap-4">
+                    {orders.map(order => (
+                        <div key={order.id} className="border p-4 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-50">
+                            <div>
+                                <div className="font-bold text-lg">
+                                    Ordine #{order.id}
+                                    <span className={`ml-2 text-sm px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                                        {order.status}
+                                    </span>
+                                    <span className="ml-2 text-sm px-2 py-1 rounded-full bg-gray-200 text-gray-800 flex items-center gap-1">
+                                        {order.orderType === 'DINE_IN' ? (
+                                            <>
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                                Tavolo
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                                Asporto
+                                            </>
+                                        )}
+                                    </span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    {new Date(order.createdAt).toLocaleDateString()} alle {new Date(order.createdAt).toLocaleTimeString()}
+                                </div>
+                                <div className="mt-2 text-sm">
+                                    {order.items.length} articoli - Totale: <span className="font-bold">€{order.totalAmount.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-4 md:mt-0 flex flex-col items-end gap-2">
+                                {!order.paid && order.status !== 'CANCELLED' && (
+                                    <button 
+                                        onClick={() => handlePay(order.id, order.totalAmount)}
+                                        className="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600 font-semibold shadow-sm"
+                                    >
+                                        Paga Ora
+                                    </button>
+                                )}
+                                {order.paid && <span className="text-green-600 font-bold text-sm">PAGATO</span>}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
-      ))}
-    </div>
-  </div>
-);
+    );
+};
+
+const getStatusColor = (status: string) => {
+    const colors: {[key: string]: string} = {
+        'PENDING': 'bg-yellow-100 text-yellow-800',
+        'PREPARING': 'bg-blue-100 text-blue-800',
+        'COMPLETED': 'bg-green-100 text-green-800',
+        'CANCELLED': 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+}
 
 export default Orders;

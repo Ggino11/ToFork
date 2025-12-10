@@ -7,7 +7,7 @@ public class UpdateBookingRequest {
     private LocalDateTime bookingDate;
     private Integer peopleCount;
     private String phoneNumber;
-    private String specialRequests;
+
     private BookingStatus status;
 
     public UpdateBookingRequest() {}
@@ -15,8 +15,7 @@ public class UpdateBookingRequest {
     // Validation method
     public boolean isValid() {
         return bookingDate != null || peopleCount != null || status != null ||
-                (phoneNumber != null && !phoneNumber.trim().isEmpty()) ||
-                specialRequests != null;
+                (phoneNumber != null && !phoneNumber.trim().isEmpty());
     }
 
     // Getters and Setters
@@ -29,8 +28,7 @@ public class UpdateBookingRequest {
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getSpecialRequests() { return specialRequests; }
-    public void setSpecialRequests(String specialRequests) { this.specialRequests = specialRequests; }
+
 
     public BookingStatus getStatus() { return status; }
     public void setStatus(BookingStatus status) { this.status = status; }

@@ -1,20 +1,25 @@
 package com.tofork.orderservice.service;
 
+
 import com.tofork.orderservice.dto.CreateOrderRequest;
-import com.tofork.orderservice.dto.OrderItemRequest;
-import com.tofork.orderservice.dto.UpdateOrderStatusRequest;
+import com.tofork.orderservice.dto.OrderItemDTO;
 import com.tofork.orderservice.model.Order;
 import com.tofork.orderservice.model.OrderItem;
 import com.tofork.orderservice.model.OrderStatus;
+import com.tofork.orderservice.model.OrderType; 
 import com.tofork.orderservice.repository.OrderRepository;
-import com.tofork.orderservice.repository.OrderItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -22,174 +27,94 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
-    @Autowired
-    private OrderItemRepository orderItemRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    // Internal service URL (docker network)
+    private final String BOOKING_SERVICE_URL = "http://tofork-booking-service:8085/api/bookings";
 
     @Override
     @Transactional
-    public Order createOrder(CreateOrderRequest request) throws Exception {
-        // Validazione input
-        if (!request.isValid()) {
-            throw new Exception("Dati ordine non validi");
-        }
-
-        if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new Exception("L'ordine deve contenere almeno un prodotto");
-        }
-
-        // Crea ordine
-        Order order = new Order();
-        order.setUserId(request.getUserId());
-        order.setUserEmail(request.getUserEmail());
-        order.setUserName(request.getUserName());
-        order.setRestaurantId(request.getRestaurantId());
-        order.setRestaurantName(request.getRestaurantName());
-        order.setDeliveryAddress(request.getDeliveryAddress());
-        order.setPhoneNumber(request.getPhoneNumber());
-        order.setSpecialInstructions(request.getSpecialInstructions());
-        order.setDeliveryFee(request.getDeliveryFee());
-        order.setTaxAmount(request.getTaxAmount());
-
-        // Calcola totale dagli items
-        BigDecimal itemsTotal = request.calculateItemsTotal();
-        order.setTotalAmount(itemsTotal);
-
-        // Imposta tempo di consegna stimato (60 minuti default)
-        order.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(60));
-
-        // Salva ordine
-        Order savedOrder = orderRepository.save(order);
-
-        // Crea items
-        for (OrderItemRequest itemRequest : request.getItems()) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(savedOrder);
-            orderItem.setFoodItemId(itemRequest.getFoodItemId());
-            orderItem.setFoodItemName(itemRequest.getFoodItemName());
-            orderItem.setQuantity(itemRequest.getQuantity());
-            orderItem.setUnitPrice(itemRequest.getUnitPrice());
-            orderItem.setSpecialRequests(itemRequest.getSpecialRequests());
-
-            // Il totalPrice viene calcolato automaticamente in @PrePersist
-            orderItemRepository.save(orderItem);
-            savedOrder.addItem(orderItem);
-        }
-
-        return savedOrder;
-    }
-
-    @Override
-    public Order findOrderById(Long orderId) throws Exception {
-        Optional<Order> orderOpt = orderRepository.findById(orderId);
-        if (orderOpt.isEmpty()) {
-            throw new Exception("Ordine non trovato con ID: " + orderId);
-        }
-        return orderOpt.get();
-    }
-
-    @Override
-    @Transactional
-    public Order updateOrderStatus(Long orderId, UpdateOrderStatusRequest request, String userRole) throws Exception {
-        if (!request.isValid()) {
-            throw new Exception("Richiesta aggiornamento stato non valida");
-        }
-
-        Order order = findOrderById(orderId);
-
-        // Verifica autorizzazioni per aggiornamento stato
-        if (request.getOrderStatus() != null) {
-            validateOrderStatusUpdate(order, request.getOrderStatus(), userRole);
-            order.setOrderStatus(request.getOrderStatus());
-
-            // Aggiorna tempo di consegna effettivo se consegnato
-            if (request.getOrderStatus() == OrderStatus.DELIVERED && order.getActualDeliveryTime() == null) {
-                order.setActualDeliveryTime(LocalDateTime.now());
+    public Order createOrder(CreateOrderRequest request, Long userId, String authToken) throws Exception {
+        // 1. Determine Order Type
+        OrderType type = OrderType.TAKEAWAY;
+        if (request.getOrderType() != null) {
+            try {
+                type = OrderType.valueOf(request.getOrderType());
+            } catch (IllegalArgumentException e) {
+                throw new Exception("Tipo ordine non valido: " + request.getOrderType());
             }
         }
+        
+        // 2. Validate DINE_IN
+        if (type == OrderType.DINE_IN) {
+            if (request.getBookingId() == null) throw new Exception("Prenotazione obbligatoria per ordine al tavolo");
+            verifyBooking(request.getBookingId(), userId, request.getRestaurantId(), authToken);
+        }
 
-        if (request.getPaymentStatus() != null) {
-            order.setPaymentStatus(request.getPaymentStatus());
+        // 3. Create Order Entity
+        Order order = new Order();
+        order.setUserId(userId);
+        order.setRestaurantId(request.getRestaurantId());
+        order.setBookingId(type == OrderType.DINE_IN ? request.getBookingId() : null); // Only set if DINE_IN
+        order.setStatus(OrderStatus.PENDING);
+        order.setTotalAmount(request.getTotalAmount());
+        order.setOrderType(type);
+
+        // 4. Add Items
+        if (request.getItems() != null) {
+            for (OrderItemDTO itemDTO : request.getItems()) {
+                OrderItem item = new OrderItem();
+                item.setMenuItemId(itemDTO.getFoodItemId());
+                item.setName(itemDTO.getFoodItemName());
+                item.setQuantity(itemDTO.getQuantity());
+                item.setUnitPrice(itemDTO.getUnitPrice());
+                item.setSpecialRequests(itemDTO.getSpecialRequests());
+                item.setSubtotal(itemDTO.getUnitPrice() * itemDTO.getQuantity());
+                order.addItem(item);
+            }
         }
 
         return orderRepository.save(order);
     }
-
-    private void validateOrderStatusUpdate(Order order, OrderStatus newStatus, String userRole) throws Exception {
-        OrderStatus currentStatus = order.getOrderStatus();
-
-        // Admin può fare qualsiasi cambio
-        if ("ADMIN".equals(userRole)) {
-            return;
-        }
-
-        // Restaurant owner può aggiornare solo certi stati
-        if ("RESTAURANT_OWNER".equals(userRole)) {
-            switch (newStatus) {
-                case CONFIRMED:
-                    if (currentStatus != OrderStatus.PENDING) {
-                        throw new Exception("Può confermare solo ordini in attesa");
-                    }
-                    break;
-                case PREPARING:
-                    if (currentStatus != OrderStatus.CONFIRMED) {
-                        throw new Exception("Può preparare solo ordini confermati");
-                    }
-                    break;
-                case READY:
-                    if (currentStatus != OrderStatus.PREPARING) {
-                        throw new Exception("Può segnare pronto solo ordini in preparazione");
-                    }
-                    break;
-                case OUT_FOR_DELIVERY:
-                    if (currentStatus != OrderStatus.READY) {
-                        throw new Exception("Può mandare in consegna solo ordini pronti");
-                    }
-                    break;
-                case DELIVERED:
-                    if (currentStatus != OrderStatus.OUT_FOR_DELIVERY) {
-                        throw new Exception("Può segnare consegnato solo ordini in consegna");
-                    }
-                    break;
-                case REJECTED:
-                    if (currentStatus != OrderStatus.PENDING) {
-                        throw new Exception("Può rifiutare solo ordini in attesa");
-                    }
-                    break;
-                default:
-                    throw new Exception("Stato non permesso per ristoratori");
+    
+    private void verifyBooking(Long bookingId, Long userId, Long restaurantId, String authToken) throws Exception {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", authToken.startsWith("Bearer ") ? authToken : "Bearer " + authToken);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                BOOKING_SERVICE_URL + "/" + bookingId,
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                Map.class
+            );
+            
+            Map body = response.getBody();
+            if (body == null || !Boolean.TRUE.equals(body.get("success"))) {
+                throw new Exception("Prenotazione non trovata");
             }
-        } else {
-            throw new Exception("Non autorizzato ad aggiornare stato ordine");
+            
+            Map data = (Map) body.get("data");
+            
+            // Validate Ownership, Restaurant and Status
+            Long bUserId = ((Number) data.get("userId")).longValue();
+            Long bRestId = ((Number) data.get("restaurantId")).longValue();
+            String status = (String) data.get("status");
+
+            if (!bUserId.equals(userId)) throw new Exception("Prenotazione non tua");
+            if (!bRestId.equals(restaurantId)) throw new Exception("Ristorante errato");
+            if (!"CONFIRMED".equals(status)) throw new Exception("Prenotazione non CONFERMATA");
+            
+            // We trust the booking service for date validity if it's confirmed.
+
+        } catch (Exception e) {
+            throw new Exception("Check prenotazione fallito: " + e.getMessage());
         }
-    }
-
-    @Override
-    @Transactional
-    public void cancelOrder(Long orderId, Long userId) throws Exception {
-        Order order = findOrderById(orderId);
-
-        // Verifica che l'ordine appartenga all'utente
-        if (!order.getUserId().equals(userId)) {
-            throw new Exception("Non autorizzato a cancellare questo ordine");
-        }
-
-        // Verifica che l'ordine possa essere cancellato
-        if (!order.canBeCancelled()) {
-            throw new Exception("Ordine non può essere cancellato nello stato attuale: " + order.getOrderStatus());
-        }
-
-        order.setOrderStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
     }
 
     @Override
     public List<Order> getUserOrders(Long userId) {
         return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
-    }
-
-    @Override
-    public List<Order> getUserOrdersByStatus(Long userId, OrderStatus status) {
-        return orderRepository.findByUserIdAndOrderStatusOrderByCreatedAtDesc(userId, status);
     }
 
     @Override
@@ -199,27 +124,40 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getRestaurantOrdersByStatus(Long restaurantId, OrderStatus status) {
-        return orderRepository.findByRestaurantIdAndOrderStatusOrderByCreatedAtDesc(restaurantId, status);
+        return orderRepository.findByRestaurantIdAndStatusOrderByCreatedAtAsc(restaurantId, status);
     }
 
     @Override
-    public List<Order> getRestaurantOrdersByDateRange(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate) {
-        return orderRepository.findByRestaurantIdAndCreatedAtBetweenOrderByCreatedAtDesc(restaurantId, startDate, endDate);
-    }
-
-    @Override
-    public boolean canUserAccessOrder(Long orderId, Long userId, String userRole) throws Exception {
-        if ("ADMIN".equals(userRole)) {
-            return true;
+    @Transactional
+    public Order updateOrderStatus(Long orderId, OrderStatus newStatus, Long ownerId) throws Exception {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new Exception("Ordine non trovato"));
+                
+        // Validation of transitions
+        OrderStatus current = order.getStatus();
+        
+        // PENDING -> PREPARING
+        if (current == OrderStatus.PENDING && newStatus == OrderStatus.PREPARING) {
+            order.setStatus(newStatus);
         }
-
-        Order order = findOrderById(orderId);
-        return order.getUserId().equals(userId);
+        // PREPARING -> COMPLETED
+        else if (current == OrderStatus.PREPARING && newStatus == OrderStatus.COMPLETED) {
+            order.setStatus(newStatus);
+        }
+        else {
+            throw new Exception("Transizione di stato non valida: da " + current + " a " + newStatus);
+        }
+        
+        return orderRepository.save(order);
     }
 
     @Override
-    public boolean canRestaurantAccessOrder(Long orderId, Long restaurantId) throws Exception {
-        Order order = findOrderById(orderId);
-        return order.getRestaurantId().equals(restaurantId);
+    public Order markOrderPaid(Long orderId, String paymentId) throws Exception {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new Exception("Ordine non trovato"));
+        
+        order.setPaid(true);
+        order.setPaymentId(paymentId);
+        return orderRepository.save(order);
     }
 }

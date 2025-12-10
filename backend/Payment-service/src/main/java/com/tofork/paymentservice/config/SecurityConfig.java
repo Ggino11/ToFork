@@ -29,13 +29,8 @@ public class SecurityConfig {
         http
                 // Disabilita CSRF per API REST
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"))
                         .ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/api/payments/stripe/webhook"))
                         .disable())
-
-                // Disabilita frame options per H2 console
-                .headers(headers -> headers
-                        .frameOptions().sameOrigin())
 
                 // Configura CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -48,7 +43,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Endpoint pubblici
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/payments/stripe/webhook").permitAll()
                         .requestMatchers("/api/payments/stripe/config").permitAll()
 

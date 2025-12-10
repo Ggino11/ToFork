@@ -11,7 +11,7 @@ public class CreateBookingRequest {
     private LocalDateTime bookingDate;
     private Integer peopleCount;
     private String phoneNumber;
-    private String specialRequests;
+
 
     private Long tableId;
     private LocalDateTime endTime;
@@ -58,8 +58,7 @@ public class CreateBookingRequest {
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getSpecialRequests() { return specialRequests; }
-    public void setSpecialRequests(String specialRequests) { this.specialRequests = specialRequests; }
+
 
     public Long getTableId() { return tableId; }
     public void setTableId(Long tableId) { this.tableId = tableId; }

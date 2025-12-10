@@ -248,7 +248,7 @@ const AuthPage = () => {
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     setServerError(null);
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://tofork.local";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
     let endpoint = "";
 
     if (formMode === "login") endpoint = `${baseUrl}/api/auth/login`;

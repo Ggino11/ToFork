@@ -12,22 +12,22 @@ import java.util.List;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     // Find all items for a specific order
-    List<OrderItem> findByOrderIdOrderByCreatedAtAsc(Long orderId);
+    List<OrderItem> findByOrderIdOrderByIdAsc(Long orderId);
 
     // Find items by food item ID across all orders
-    List<OrderItem> findByFoodItemId(Long foodItemId);
+    List<OrderItem> findByMenuItemId(Long menuItemId);
 
     // Count total quantity sold for a specific food item
-    @Query("SELECT SUM(oi.quantity) FROM OrderItem oi WHERE oi.foodItemId = :foodItemId")
-    Long getTotalQuantitySoldByFoodItem(@Param("foodItemId") Long foodItemId);
+    @Query("SELECT SUM(oi.quantity) FROM OrderItem oi WHERE oi.menuItemId = :menuItemId")
+    Long getTotalQuantitySoldByFoodItem(@Param("menuItemId") Long menuItemId);
 
     // Find most popular items for a restaurant (via order relationship)
-    @Query("SELECT oi.foodItemName, oi.foodItemId, SUM(oi.quantity) as totalQuantity " +
+    @Query("SELECT oi.name, oi.menuItemId, SUM(oi.quantity) as totalQuantity " +
             "FROM OrderItem oi JOIN oi.order o WHERE o.restaurantId = :restaurantId " +
-            "GROUP BY oi.foodItemId, oi.foodItemName ORDER BY totalQuantity DESC")
+            "GROUP BY oi.menuItemId, oi.name ORDER BY totalQuantity DESC")
     List<Object[]> findMostPopularItemsByRestaurant(@Param("restaurantId") Long restaurantId);
 
     // Calculate total revenue for a specific food item
-    @Query("SELECT SUM(oi.totalPrice) FROM OrderItem oi WHERE oi.foodItemId = :foodItemId")
-    Double getTotalRevenueByFoodItem(@Param("foodItemId") Long foodItemId);
+    @Query("SELECT SUM(oi.subtotal) FROM OrderItem oi WHERE oi.menuItemId = :menuItemId")
+    Double getTotalRevenueByFoodItem(@Param("menuItemId") Long menuItemId);
 }

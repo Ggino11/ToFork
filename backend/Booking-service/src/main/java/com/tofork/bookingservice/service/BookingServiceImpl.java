@@ -64,9 +64,7 @@ public class BookingServiceImpl implements BookingService {
             booking.setPhoneNumber(request.getPhoneNumber());
         }
 
-        if (request.getSpecialRequests() != null) {
-            booking.setSpecialRequests(request.getSpecialRequests());
-        }
+
 
         // Solo ristoratori e admin possono cambiare lo stato
         if (request.getStatus() != null) {
@@ -172,7 +170,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setEndTime(endTime);
         booking.setPeopleCount(request.getPeopleCount());
         booking.setPhoneNumber(request.getPhoneNumber());
-        booking.setSpecialRequests(request.getSpecialRequests());
+
         booking.setStatus(BookingStatus.PENDING); // Default to PENDING
 
         return bookingRepository.save(booking);

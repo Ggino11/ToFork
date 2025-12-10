@@ -41,8 +41,7 @@ public class Booking {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
-    @Column(name = "special_requests", length = 1000)
-    private String specialRequests;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -122,8 +121,7 @@ public class Booking {
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getSpecialRequests() { return specialRequests; }
-    public void setSpecialRequests(String specialRequests) { this.specialRequests = specialRequests; }
+
 
     public BookingStatus getStatus() { return status; }
     public void setStatus(BookingStatus status) { this.status = status; }
