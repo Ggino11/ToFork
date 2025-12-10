@@ -143,10 +143,17 @@ public class OrderController {
     @PostMapping("/{id}/pay")
     public ResponseEntity<ApiResponse<Order>> payOrder(
         @PathVariable Long id,
-        @RequestHeader("Authorization") String authHeader) {
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
+        @RequestHeader(value = "X-Internal-Secret", required = false) String internalSecret) {
         try {
-            getUserId(authHeader); // just validate token
-            // Mock payment
+            // Internal Service Auth Bypass
+            if ("TOFORK_INTERNAL_SECRET_2025".equals(internalSecret)) {
+                // Authorized system call
+            } else {
+                getUserId(authHeader); // Validate user token otherwise
+            }
+            
+            // Mock payment or Real payment notification
             String paymentId = "PAY-" + System.currentTimeMillis();
             Order order = orderService.markOrderPaid(id, paymentId);
             return ResponseEntity.ok(ApiResponse.success("Pagamento effettuato", order));

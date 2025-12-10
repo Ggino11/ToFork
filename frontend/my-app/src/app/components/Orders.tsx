@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface OrderItem {
     id: number;
@@ -25,34 +25,104 @@ const Orders: FC = () => {
     const { token } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [paymentStatus, setPaymentStatus] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
     const router = useRouter();
+    const searchParams = useSearchParams();
 
+    // Fetch ordini
+    const fetchOrders = async () => {
+        if (!token) return;
+        try {
+            const res = await fetch('http://localhost/api/orders/user/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setOrders(data.data);
+            }
+        } catch (err) {
+            console.error("Error fetching orders", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+    }, [token]);
+
+    // Gestione redirect da Stripe
     useEffect(() => {
         if (!token) return;
 
-        const fetchOrders = async () => {
-            try {
-                const res = await fetch('http://localhost/api/orders/user/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    setOrders(data.data);
-                }
-            } catch (err) {
-                console.error("Error fetching orders", err);
-            } finally {
-                setLoading(false);
-            }
-        };
+        const sessionId = searchParams.get('session_id');
+        const canceled = searchParams.get('canceled');
 
-        fetchOrders();
-    }, [token]);
-    
-    const handlePay = (orderId: number, amount: number) => {
-        alert("Verrai reindirizzato al pagamento (Mock)");
-        // In future: Redirect to payment service
-        // window.location.href = ...
+        if (canceled) {
+            setPaymentStatus({ type: 'error', message: 'Pagamento annullato.' });
+            // Rimuovi query param
+            router.replace(window.location.pathname);
+        }
+        else if (sessionId) {
+            verifyPayment(sessionId);
+        }
+    }, [searchParams, token]);
+
+    const verifyPayment = async (sessionId: string) => {
+        setPaymentStatus({ type: 'info', message: 'Verifica pagamento in corso...' });
+        try {
+            const res = await fetch(`http://localhost/api/payments/success?session_id=${sessionId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (res.ok) {
+                const payment = await res.json();
+                setPaymentStatus({ type: 'success', message: 'Pagamento completato con successo!' });
+                fetchOrders(); // Ricarica ordini
+            } else {
+                setPaymentStatus({ type: 'error', message: 'Errore durante la verifica del pagamento.' });
+            }
+        } catch (e) {
+            setPaymentStatus({ type: 'error', message: 'Errore di connessione.' });
+        } finally {
+            // Pulisci URL
+            router.replace(window.location.pathname);
+        }
+    };
+
+    const handlePay = async (orderId: number, amount: number) => {
+        if (!token) return;
+
+        // URL corrente per ritorno
+        const returnUrl = window.location.href.split('?')[0]; 
+
+        try {
+            const res = await fetch('http://localhost/api/payments/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    orderId,
+                    amount,
+                    successUrl: returnUrl + '?success=1', // Stripe aggiungerà &session_id=...
+                    cancelUrl: returnUrl + '?canceled=1'
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.checkoutUrl) {
+                    window.location.href = data.checkoutUrl;
+                }
+            } else {
+                alert("Errore inizializzazione pagamento");
+            }
+        } catch (e) {
+            alert("Errore di rete");
+        }
     };
 
     if (loading) return <div className="p-4">Caricamento ordini...</div>;
@@ -60,6 +130,17 @@ const Orders: FC = () => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-4 text-gray-900">I miei Ordini</h3>
+            
+            {paymentStatus && (
+                <div className={`mb-4 p-4 rounded ${
+                    paymentStatus.type === 'success' ? 'bg-green-100 text-green-700' :
+                    paymentStatus.type === 'error' ? 'bg-red-100 text-red-700' :
+                    'bg-blue-100 text-blue-700'
+                }`}>
+                    {paymentStatus.message}
+                </div>
+            )}
+
             {orders.length === 0 ? (
                 <p className="text-gray-500">Nessun ordine effettuato.</p>
             ) : (
@@ -95,15 +176,18 @@ const Orders: FC = () => {
                             </div>
                             
                             <div className="mt-4 md:mt-0 flex flex-col items-end gap-2">
-                                {!order.paid && order.status !== 'CANCELLED' && (
+                                {!order.paid && order.status !== 'CANCELLED' ? (
                                     <button 
                                         onClick={() => handlePay(order.id, order.totalAmount)}
                                         className="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600 font-semibold shadow-sm"
                                     >
                                         Paga Ora
                                     </button>
+                                ) : (
+                                    <span className={`font-bold text-sm ${order.status === 'CANCELLED' ? 'text-red-600' : 'text-green-600'}`}>
+                                        {order.status === 'CANCELLED' ? 'ANNULLATO' : 'PAGATO'}
+                                    </span>
                                 )}
-                                {order.paid && <span className="text-green-600 font-bold text-sm">PAGATO</span>}
                             </div>
                         </div>
                     ))}

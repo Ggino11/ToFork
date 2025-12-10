@@ -27,7 +27,7 @@ const FoodCard: React.FC<FoodCardProps> = ({ id, imageUrl, title, description, p
       restaurantId,
       restaurantName: restaurantName || "Ristorante"
     });
-    // Optional: visual feedback
+  
   };
 
   return (
@@ -67,59 +67,5 @@ const FoodCard: React.FC<FoodCardProps> = ({ id, imageUrl, title, description, p
     </div>
   );
 };
-
-/* ESEMPIO DI UTILIZZO:
-  Puoi usare questo componente in un'altra pagina, come Menu.tsx, 
-  per visualizzare una lista di piatti.
-
-  import React from 'react';
-  import FoodCard from './FoodCard';
-
-  const menuItems = [
-    {
-      id: 'b1',
-      title: 'CHEL',
-      description: 'Hamburger di manzo, insalata, pomodoro, maionese',
-      price: 8.70,
-      imageUrl: 'https://placehold.co/100x100/f97316/white?text=Burger', 
-    },
-    {
-      id: 'b2',
-      title: 'M** VEGETARIAN',
-      description: 'Con verdure fresche dell\'orto, salsa di pomodoro e cetrioli',
-      price: 9.90,
-      imageUrl: 'https://placehold.co/100x100/22c55e/white?text=Veggie',
-    },
-    {
-      id: 'p1',
-      title: 'PATATE RUFE',
-      description: 'Patate al forno belle calde con salsa (maionese e extra)',
-      price: 5.90,
-      imageUrl: 'https://placehold.co/100x100/eab308/white?text=Fries',
-    }
-  ];
-
-  const MenuPage = () => {
-    return (
-      <div className="bg-gray-100 p-8">
-        <h2 className="text-3xl font-bold mb-6 text-orange-500">Burgers</h2>
-        <div className="flex flex-wrap justify-center gap-4">
-          {menuItems.map(item => (
-            <FoodCard
-              key={item.id}
-              title={item.title}
-              description={item.description}
-              price={item.price}
-              imageUrl={item.imageUrl}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  export default MenuPage;
-*/
-
 
 export default FoodCard;

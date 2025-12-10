@@ -2,10 +2,7 @@
 
 import { FaUser, FaCreditCard, FaReceipt, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-// RIMOSSO: import Link (creava conflitti)
-// RIMOSSO: import router (non serve e quello di next/router è deprecato in app dir)
 
-// Definisci i tipi per le props
 // Definisci i tipi per le props
 type ActiveView = 'profile' | 'bookings' | 'orders';
 
@@ -25,7 +22,7 @@ export default function ProfileSidebar({ activeView, setActiveView }: ProfileSid
   const { logout } = useAuth();
 
   const handleLogout = async () => {
-    // Ho cambiato il messaggio di log così se lo vedi sai che il file è aggiornato
+    // Log per capire se entra in logout
     console.log("Inizio procedura logout...");
     
     try {

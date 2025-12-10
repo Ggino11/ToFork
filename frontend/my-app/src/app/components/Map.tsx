@@ -28,6 +28,7 @@ interface OSMElement {
     };
 }
 
+// carica icone marker leaflet correttamente
 const fixLeafletIcon = () => {
     delete ((L.Icon.Default.prototype as unknown) as { _getIconUrl?: unknown })._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -42,6 +43,8 @@ export default function TorinoRestaurantsMap() {
 
     useEffect(() => {
         fixLeafletIcon();
+        // Query Overpass: recupera i ristoranti nell'area amministrativa di Torino
+        
         const query = `
       [out:json][timeout:25];
       area["name"="Torino"]["boundary"="administrative"]->.searchArea;
@@ -61,6 +64,7 @@ export default function TorinoRestaurantsMap() {
             .then(data => {
                 const places: Restaurant[] = data.elements
                     .map((el: OSMElement) => {
+                        // Normalizza coordinate: usa lat/lon o center se necessario
                         let lat = el.lat;
                         let lon = el.lon;
                         if (!lat && el.center) {
@@ -84,7 +88,7 @@ export default function TorinoRestaurantsMap() {
             .catch(console.error);
     }, []);
 
-    const torinoCenter: [number, number] = [45.0703, 7.6869];
+    const torinoCenter: [number, number] = [45.0703, 7.6869]; // Coordinate del centro di Torino
 
     return (
         <main>

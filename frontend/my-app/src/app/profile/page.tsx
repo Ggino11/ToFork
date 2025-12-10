@@ -24,6 +24,14 @@ export default function ProfilePage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
+  // Se torno da Stripe, mostra Orders
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('session_id') || params.has('canceled')) {
+        setActiveView('orders');
+    }
+  }, []);
+
   // Loading state 
   if (isLoading) {
     return (

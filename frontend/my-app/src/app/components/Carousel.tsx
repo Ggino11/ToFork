@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link"; // Importa Link di Next.js
+import Link from "next/link"; 
 
 const offerte = [
     { src: "/mollica.png", alt: "Mollica", link: "/ristoranti/mollica" },
@@ -34,6 +34,7 @@ export default function Carousel() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+    // scorrimento automatico 
     useEffect(() => {
         const interval = setInterval(() => {
             setStartIdx((prev) => (prev + 1) % offerte.length);
