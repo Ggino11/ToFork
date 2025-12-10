@@ -50,11 +50,11 @@ const restaurants = [
                 { id: "p2", title: "PATATE SPECIAL", description: "Con cheddar fuso e pancetta", price: 6.00, imageUrl: "/img/fries2.jpg" },
             ],
             'Cold Drinks': [
-                { id: "d1", title: "Coca-ina", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
+                { id: "d1", title: "Coca-cola", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
                 { id: "d2", title: "Birra ", description: "Bionda 50cl", price: 5.00, imageUrl: "/img/drink2.jpg" },
             ],
             'gggg': [
-                { id: "c1", title: "Coca-ina", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
+                { id: "c1", title: "Coca-cola", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
                 { id: "c2", title: "sda ", description: "Bionda 50cl", price: 5.00, imageUrl: "/img/drink2.jpg" },
             ],
         }
@@ -82,12 +82,12 @@ const restaurants = [
                 { id: "p2", title: "PATATE SPECIAL", description: "Con cheddar fuso e pancetta", price: 6.00, imageUrl: "/img/fries2.jpg" },
             ],
             'Cold Drinks': [
-                { id: "d1", title: "Coca-ina", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
+                { id: "d1", title: "Coca-cola", description: "330cl", price: 2.50, imageUrl: "/img/drink1.jpg" },
                 { id: "d2", title: "Birra ", description: "Bionda 50cl", price: 5.00, imageUrl: "/img/drink2.jpg" },
             ],
             'gggg': [
-                { id: "c1", title: "Coca-ina", description: "330gr", price: 2.50, imageUrl: "/img/drink1.jpg" },
-                { id: "c2", title: "sda ", description: "Bionda 50cl", price: 5.00, imageUrl: "/img/drink2.jpg" },
+                { id: "c1", title: "Coca-cola", description: "330cl", price: 2.50, imageUrl: "/img/drink1.jpg" },
+                { id: "c2", title: "Birra ", description: "Bionda 50cl", price: 5.00, imageUrl: "/img/drink2.jpg" },
             ],
         }
     },

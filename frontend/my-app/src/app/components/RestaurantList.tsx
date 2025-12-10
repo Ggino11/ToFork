@@ -11,7 +11,7 @@ const RestaurantList = ({ search, selectedTab }: Props) => {
     const [restaurants, setRestaurants] = useState<any[]>([]);
 
     // MODIFICA: Usiamo la variabile d'ambiente o il dominio dell'Ingress
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://tofork.local';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'; //tofork.local ma non accettato da oauth
 
     useEffect(() => {
         // MODIFICA: Fetch dinamica attraverso il Gateway

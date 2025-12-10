@@ -35,10 +35,10 @@ const MenuComponent: FC = () => {
   });
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
 
   useEffect(() => {
     if (user?.id) {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
         fetch(`${API_BASE_URL}/api/restaurants/owner/${user.id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -60,7 +60,7 @@ const MenuComponent: FC = () => {
 
   useEffect(() => {
     if (restaurantId) {
-        fetch(`http://localhost:8083/api/menu-items/restaurant/${restaurantId}`, {
+        fetch(`${API_BASE_URL}/api/menu-items/restaurant/${restaurantId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
@@ -98,7 +98,7 @@ const MenuComponent: FC = () => {
     if (!restaurantId) return;
 
     try {
-      const res = await fetch(`http://localhost:8083/api/menu-items/restaurant/${restaurantId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/menu-items/restaurant/${restaurantId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ const MenuComponent: FC = () => {
   const handleDelete = async (id: number) => {
       // if (!confirm("Sei sicuro di voler eliminare questo piatto?")) return;
       try {
-          const res = await fetch(`http://localhost:8083/api/menu-items/${id}`, {
+          const res = await fetch(`${API_BASE_URL}/api/menu-items/${id}`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${token}` }
           });
