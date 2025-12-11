@@ -31,9 +31,9 @@ public class AuthController {
 
     /**
      * POST /api/auth/register-restaurant - Endpoint alternativo per ristoratori
-     * (compatibilità con frontend che usa /api/auth/register-restaurant)
+
      */
-    @PostMapping("/api/auth/register-restaurant")
+    @PostMapping("/auth/register-restaurant")
     public ResponseEntity<ApiResponse<Map<String, Object>>> registerRestaurant(@RequestBody RegisterRequest request) {
         // Forza il tipo a restaurant
         request.setUserType("restaurant");

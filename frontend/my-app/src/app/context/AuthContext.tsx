@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Chiamata API logout (opzionale)
         if (token) {
-            fetch(`${baseUrl}/auth/logout`, {
+            fetch(`${baseUrl}/api/auth/logout`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`

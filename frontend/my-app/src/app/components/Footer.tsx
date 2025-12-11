@@ -72,13 +72,13 @@ export default function Footer() {
         <div className="flex-1 flex-col items-start ml-auto gap-2 hidden md:flex">
           
           <span className="text-gray-500 mb-2 font-semibold">Important Links</span>
-          <Link href="/help" className="hover:underline text-gray-700">
+          <Link href="#" className="hover:underline text-gray-700">
             Get Help
           </Link>
-          <Link href="/signup" className="hover:underline text-gray-700">
+          <Link href="/auth" className="hover:underline text-gray-700">
             Signup
           </Link>
-          <Link href="/register-restaurant" className="hover:underline text-gray-700">
+          <Link href="/auth" className="hover:underline text-gray-700">
             Registra il tuo ristorante
           </Link>
         
