@@ -18,9 +18,9 @@ const CartSummary = () => {
             </div>
             <div className="max-h-40 overflow-y-auto space-y-2 mb-3">
                 {items.map(item => (
-                    <div key={item.id} className="flex justify-between items-center text-sm group">
+                    <div key={item.id} className="flex justify-between items-center text-sm group text-gray-900">
                         <div className="flex-1 flex justify-between mr-2">
-                            <span className="text-gray-600 truncate">{item.quantity}x {item.title}</span>
+                            <span className="text-gray-900 truncate">{item.quantity}x {item.title}</span>
                             <span className="font-semibold">€{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
                         <button
@@ -33,7 +33,7 @@ const CartSummary = () => {
                     </div>
                 ))}
             </div>
-            <div className="flex justify-between items-center font-bold text-lg mb-4">
+            <div className="flex justify-between items-center font-bold text-lg mb-4 text-gray-900">
                 <span>Totale</span>
                 <span className="text-orange-600">€{total.toFixed(2)}</span>
             </div>

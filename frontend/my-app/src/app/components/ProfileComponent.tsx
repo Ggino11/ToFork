@@ -141,39 +141,39 @@ const ProfileComponent = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Nome */}
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nome Ristorante</label>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Nome Ristorante</label>
                         <input
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-gray-500"
                             required
                         />
                     </div>
 
                     {/* Categoria Custom Dropdown Style */}
                     <div className="relative">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Categoria</label>
                         <div className="relative">
                             <select
                                 name="category"
                                 value={formData.category}
                                 onChange={handleChange}
-                                className="w-full p-3 pr-10 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white transition-all cursor-pointer"
+                                className="w-full p-3 pr-10 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white transition-all cursor-pointer text-gray-500"
                             >
                                 <option value="">Seleziona categoria</option>
                                 {CATEGORIES.map(cat => (
                                     <option key={cat} value={cat}>{cat}</option>
                                 ))}
                             </select>
-                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none h-5 w-5" />
+                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700 pointer-events-none h-5 w-5" />
                         </div>
                     </div>
 
                     {/* Prezzo Medio */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Prezzo Medio (€)</label>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Prezzo Medio (€)</label>
                         <input
                             type="number"
                             name="averagePrice"
@@ -181,38 +181,38 @@ const ProfileComponent = () => {
                             onChange={handleChange}
                             min="0"
                             step="0.50"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-gray-500"
                         />
                     </div>
 
                     {/* Indirizzo */}
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Indirizzo</label>
                         <input
                             type="text"
                             name="address"
                             value={formData.address}
                             onChange={handleChange}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-gray-500"
                             required
                         />
                     </div>
 
                     {/* Descrizione */}
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Descrizione</label>
                         <textarea
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
                             rows={4}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-gray-500"
                         />
                     </div>
 
                     {/* Image Drag & Drop */}
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Foto Profilo</label>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Foto Profilo</label>
                         <div 
                             className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
                                 isDragging ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-orange-400'
@@ -238,8 +238,8 @@ const ProfileComponent = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center text-gray-500">
-                                    <Upload className="h-12 w-12 mb-3 text-gray-400" />
+                                <div className="flex flex-col items-center text-gray-700">
+                                    <Upload className="h-12 w-12 mb-3 text-gray-700" />
                                     <p className="font-medium">Clicca per caricare o trascina un'immagine qui</p>
                                     <p className="text-sm text-gray-400 mt-1">PNG, JPG fino a 5MB</p>
                                 </div>

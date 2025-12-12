@@ -184,7 +184,7 @@ const MenuComponent: FC = () => {
                     <input 
                       value={newItem.title}
                       onChange={e => setNewItem({...newItem, title: e.target.value})}
-                      className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none"
+                      className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none placeholder-gray-400 text-gray-600"
                       placeholder="Es. Carbonara"
                       required
                     />
@@ -194,7 +194,7 @@ const MenuComponent: FC = () => {
                     <select 
                       value={newItem.category}
                       onChange={e => setNewItem({...newItem, category: e.target.value})}
-                      className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none appearance-none"
+                      className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none appearance-none text-gray-400"
                     >
                       {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
@@ -208,7 +208,7 @@ const MenuComponent: FC = () => {
                     step="0.10"
                     value={newItem.price}
                     onChange={e => setNewItem({...newItem, price: e.target.value})}
-                    className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none"
+                    className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none placeholder-gray-400 text-gray-600"
                     placeholder="0.00"
                     required
                   />
@@ -219,7 +219,7 @@ const MenuComponent: FC = () => {
                   <textarea 
                     value={newItem.description}
                     onChange={e => setNewItem({...newItem, description: e.target.value})}
-                    className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none"
+                    className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all outline-none placeholder-gray-400 text-gray-600"
                     rows={4}
                     placeholder="Descrivi gli ingredienti e la preparazione..."
                   />

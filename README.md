@@ -15,7 +15,7 @@
 
 ## 📋 Panoramica
 
-**ToFork** è unapiattaforma per la gestione di ristoranti, prenotazioni e ordini. Costruita con un'architettura a microservizi,  permette agli utenti di prenotare tavoli, effettuare ordini e pagare i propri irdini e fornisce funzionalità di gestione per i ristoranti.
+**ToFork** è una piattaforma per la gestione di ristoranti, prenotazioni e ordini. Costruita con un'architettura a microservizi,  permette agli utenti di prenotare tavoli, effettuare ordini e pagare i propri ordini e fornisce funzionalità di gestione per i ristoranti.
 
 ### ✨ Caratteristiche Principali
 *   **🏗️ Architettura a Microservizi**: 5 servizi indipendenti che rappresentano le funzionalità del sistema.
@@ -115,20 +115,20 @@ Esegui l'intero stack in pochi minuti.
 
 Principali percorsi API esposti dal Gateway:
 
-| Metodo | Percorso | Descrizione |
-|:------:|----------|-------------|
-| **Auth** | | |
+| Metodo | Percorso | Descrizione                |
+|:------:|----------|----------------------------|
+| **Auth** | |                            |
 | `POST` | `/api/auth/register` | Registrazione nuovo utente |
-| `POST` | `/api/auth/login` | Login (Ritorna JWT) |
-| `POST` | `/api/auth/oauth/google` | Login Social |
-| **Ristoranti** | | |
-| `GET` | `/api/restaurants` | Lista tutti i ristoranti |
-| `GET` | `/api/restaurants/{id}/menu` | Menu specifico |
-| **Ordini** | | |
-| `POST` | `/api/orders` | Crea nuovo ordine |
-| `GET` | `/api/orders` | I miei ordini |
-| **Prenotazioni** | | |
-| `POST` | `/api/bookings` | Prenota un tavolo |
+| `POST` | `/api/auth/login` | Login (Ritorna JWT)        |
+| `POST` | `/api/auth/oauth/google` | Login Google                  |
+| **Ristoranti** | |                            |
+| `GET` | `/api/restaurants` | Lista tutti i ristoranti   |
+| `GET` | `/api/restaurants/{id}/menu` | Menu specifico             |
+| **Ordini** | |                            |
+| `POST` | `/api/orders` | Crea nuovo ordine          |
+| `GET` | `/api/orders` | I miei ordini              |
+| **Prenotazioni** | |                            |
+| `POST` | `/api/bookings` | Prenota un tavolo          |
 
 ---
 
