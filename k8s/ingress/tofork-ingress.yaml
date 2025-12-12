@@ -1,7 +1,10 @@
+# ==============================================================================
+# 1. INGRESS STANDARD (Frontend e API pulite)
+# ==============================================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tofork-ingress
+  name: tofork-ingress-standard
   namespace: tofork
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -12,12 +15,18 @@ spec:
     - host: localhost
       http:
         paths:
-          # --- FRONTEND ---
-          - path: /
+          # --- GOOGLE AUTH (Priorità Alta) ---
+          - path: /login/oauth2
             pathType: Prefix
-            backend: { service: { name: frontend, port: { number: 3000 } } }
+            backend: { service: { name: user-service, port: { number: 8081 } } }
+          - path: /oauth2
+            pathType: Prefix
+            backend: { service: { name: user-service, port: { number: 8081 } } }
+          - path: /api/users
+            pathType: Prefix
+            backend: { service: { name: user-service, port: { number: 8081 } } }
 
-          # --- API BACKEND (Nessun Rewrite) ---
+          # --- ALTRE API ---
           - path: /api/restaurants
             pathType: Prefix
             backend: { service: { name: restaurant-service, port: { number: 8083 } } }
@@ -27,37 +36,31 @@ spec:
           - path: /api/orders
             pathType: Prefix
             backend: { service: { name: order-service, port: { number: 8082 } } }
+          - path: /api/menu-items
+            pathType: Prefix
+            backend: { service: { name: restaurant-service, port: { number: 8083 } } }
           - path: /api/payments
             pathType: Prefix
             backend: { service: { name: payment-service, port: { number: 8084 } } }
 
-          # --- AUTHENTICATION (User Service) ---
-          # Gestione login Google e API Utenti
-          - path: /api/users
+          # --- FRONTEND (Cattura tutto il resto, INCLUSO /auth) ---
+          - path: /
             pathType: Prefix
-            backend: { service: { name: user-service, port: { number: 8081 } } }
-          - path: /oauth2
-            pathType: Prefix
-            backend: { service: { name: user-service, port: { number: 8081 } } }
-          - path: /login/oauth2
-            pathType: Prefix
-            backend: { service: { name: user-service, port: { number: 8081 } } }
+            backend: { service: { name: frontend, port: { number: 3000 } } }
 
 ---
 
-# ---------------------------------------------------------
-# 2. INGRESS SPECIALE PER AUTH (Con Rewrite)
-# Gestisce SOLO /api/auth riscrivendolo per il backend
-# ---------------------------------------------------------
+# ==============================================================================
+# 2. INGRESS REWRITE (SOLO per /api/auth)
+# ==============================================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-auth-rewrite
+  name: tofork-ingress-rewrite
   namespace: tofork
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    # Questo rewrite trasforma "/api/auth/login" in "/auth/login"
-    # (Uso /auth/$2 per sicurezza, così il backend riceve il prefisso /auth)
+    # Trasforma "/api/auth/login" in "/auth/login"
     nginx.ingress.kubernetes.io/rewrite-target: /auth/$2
 spec:
   ingressClassName: nginx
@@ -65,7 +68,9 @@ spec:
     - host: localhost
       http:
         paths:
-          # Intercetta tutto ciò che inizia con /api/auth
+          # REGEX CORRETTA E SPECIFICA
+          # Cattura SOLO se inizia ESATTAMENTE con /api/auth
+          # Il gruppo (.*) cattura "login", "register", ecc.
           - path: /api/auth(/|$)(.*)
             pathType: ImplementationSpecific
             backend:

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: payment-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: payment-service
@@ -34,6 +34,6 @@ spec:
               value: "mySecretKeyWhichIsLongEnoughForHS256"
             # Metti qui le chiavi vere se vuoi testare Stripe, o lascia placeholder
             - name: STRIPE_SECRET_KEY
-              value: "sk_test_placeholder"
+              value: $STRIPE_SECRET_KEY
             - name: STRIPE_PUBLISHABLE_KEY
-              value: "pk_test_placeholder"
+              value: $STRIPE_PUBLIC_KEY

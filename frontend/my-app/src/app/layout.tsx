@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
-import './globals.css'; 
-import { AuthProvider } from './context/AuthContext'; 
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import './globals.css';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,20 +20,18 @@ export const metadata: Metadata = {
   description: "Booking and reservation platform for restaurants located in Turin, Italy.",
 };
 
-// Questo è il layout principale che avvolge OGNI pagina della tua applicazione.
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="it">
-      <body  className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/*
-          Mettendo AuthProvider qui, diventa disponibile per TUTTI i "children",
-          incluse le pagine dentro (main), auth, profile, ecc.
-        */}
-        <AuthProvider>
-             {children}
-        </AuthProvider>
-      </body>     
-    </html>
-  );
+    return (
+        <html lang="it">
+        <body  className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <AuthProvider>
+        <CartProvider>
+          <div>
+            {children}
+          </div>
+        </CartProvider>
+      </AuthProvider>
+      </body>
+      </html>
+  )
 }
-

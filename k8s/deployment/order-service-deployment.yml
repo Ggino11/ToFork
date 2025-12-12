@@ -38,6 +38,10 @@ spec:
             secretKeyRef:
               name: postgres-secret
               key: POSTGRES_PASSWORD
+        - name: SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION
+          value: "true"
+        - name: JWT_SECRET
+          value: "mySecretKeyWhichIsLongEnoughForHS256"
         - name: SPRING_RABBITMQ_HOST
           value: "rabbitmq"
         - name: SPRING_RABBITMQ_PORT

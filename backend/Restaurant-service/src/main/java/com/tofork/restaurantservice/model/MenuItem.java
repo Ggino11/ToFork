@@ -25,12 +25,18 @@ public class MenuItem {
     @Column(nullable = false)
     private String name;
 
+    // Aggiungiamo columnDefinition = "TEXT" anche qui per descrizioni lunghe
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    // --- MODIFICA IMPORTANTE QUI ---
+    // Usiamo TEXT per permettere stringhe Base64 molto lunghe
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
+    // -------------------------------
 
     private String category;
 

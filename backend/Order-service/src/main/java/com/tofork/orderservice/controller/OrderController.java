@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +35,7 @@ public class OrderController {
         if (!jwtService.validateToken(token)) throw new Exception("Token scaduto");
         return jwtService.getUserIdFromToken(token);
     }
-    
+
     private void verifyRole(String authHeader, String requiredRole) throws Exception {
          String token = authHeader.substring(7);
          String role = jwtService.getRoleFromToken(token);
@@ -49,17 +48,44 @@ public class OrderController {
             @RequestHeader("Authorization") String authHeader) {
         try {
             Long userId = getUserId(authHeader);
-            // Validation: Only override if essential, otherwise trust token
             if (request.getUserId() != null && !request.getUserId().equals(userId)) {
                  return ResponseEntity.ok(ApiResponse.error("User ID check failed"));
             }
-            // Logic
             Order order = orderService.createOrder(request, userId, authHeader);
             return ResponseEntity.ok(ApiResponse.success("Ordine creato con successo", order));
         } catch (Exception e) {
             return ResponseEntity.ok(ApiResponse.error("Errore creazione ordine: " + e.getMessage()));
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Order>> updateOrder(
+            @PathVariable Long id,
+            @RequestBody CreateOrderRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            Long userId = getUserId(authHeader);
+            Order order = orderService.updateOrder(id, request, userId);
+            return ResponseEntity.ok(ApiResponse.success("Ordine aggiornato con successo", order));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error("Errore aggiornamento ordine: " + e.getMessage()));
+        }
+    }
+
+    // --- NUOVO ENDPOINT DELETE ---
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Object>> deleteOrder(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            Long userId = getUserId(authHeader);
+            orderService.deleteOrder(id, userId);
+            return ResponseEntity.ok(ApiResponse.success("Ordine eliminato correttamente", null));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
+        }
+    }
+    // ----------------------------
 
     @GetMapping("/user/me")
     public ResponseEntity<ApiResponse<List<Order>>> getMyOrders(
@@ -81,7 +107,7 @@ public class OrderController {
             verifyRole(authHeader, "RESTAURANT_OWNER");
 
             Long restaurantId = fetchRestaurantIdByOwner(userId, authHeader);
-            
+
             List<Order> list;
             if (status != null && !status.isEmpty()) {
                 list = orderService.getRestaurantOrdersByStatus(restaurantId, OrderStatus.valueOf(status.toUpperCase()));
@@ -89,12 +115,12 @@ public class OrderController {
                 list = orderService.getRestaurantOrders(restaurantId);
             }
             return ResponseEntity.ok(ApiResponse.success("Success", list));
-            
+
         } catch (Exception e) {
             return ResponseEntity.ok(ApiResponse.error(e.getMessage()));
         }
     }
-    
+
     // Helper to fetch restaurant ID
     private Long fetchRestaurantIdByOwner(Long ownerId, String authHeader) throws Exception {
         // Mocking logic or real call - let's try real call
@@ -104,15 +130,15 @@ public class OrderController {
          HttpHeaders headers = new HttpHeaders();
          headers.set("Authorization", authHeader);
          HttpEntity<String> entity = new HttpEntity<>(headers);
-         
+
          // Response is List<Restaurant>
          ResponseEntity<List> response = rt.exchange(
-             "http://tofork-restaurant-service:8083/api/restaurants/owner/" + ownerId,
+             "http://restaurant-service:8083/api/restaurants/owner/" + ownerId,
              HttpMethod.GET,
              entity,
              List.class
          );
-         
+
          List<Map<String, Object>> restaurants = response.getBody();
          if (restaurants != null && !restaurants.isEmpty()) {
              Number n = (Number) restaurants.get(0).get("id");
@@ -129,10 +155,10 @@ public class OrderController {
         try {
             Long userId = getUserId(authHeader);
             verifyRole(authHeader, "RESTAURANT_OWNER");
-            
+
             String status = body.get("status");
             if (status == null) return ResponseEntity.ok(ApiResponse.error("Status mancante"));
-            
+
             Order order = orderService.updateOrderStatus(id, OrderStatus.valueOf(status.toUpperCase()), userId);
             return ResponseEntity.ok(ApiResponse.success("Stato aggiornato", order));
         } catch (Exception e) {
@@ -152,8 +178,7 @@ public class OrderController {
             } else {
                 getUserId(authHeader); // Validate user token otherwise
             }
-            
-            // Mock payment or Real payment notification
+
             String paymentId = "PAY-" + System.currentTimeMillis();
             Order order = orderService.markOrderPaid(id, paymentId);
             return ResponseEntity.ok(ApiResponse.success("Pagamento effettuato", order));

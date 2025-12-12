@@ -25,11 +25,15 @@ public class Restaurant {
     @Column(nullable = false)
     private String address;
 
+    // Meglio usare TEXT anche qui per descrizioni lunghe
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(unique = true)
     private String slug;
 
+    // --- MODIFICA IMPORTANTE: TEXT per supportare Base64 lunghi ---
+    @Column(columnDefinition = "TEXT")
     private String image;
 
     private String category;

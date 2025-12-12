@@ -39,14 +39,11 @@ public class MenuItemService {
                 .description(dto.getDescription())
                 .price(dto.getPrice())
                 .imageUrl(dto.getImageUrl())
+                .category(dto.getCategory())
                 .restaurant(restaurant)
                 .available(true)
                 .build();
-        
-        // Category handling if needed, assuming it's part of MenuItem model but not DTO yet?
-        // Checking MenuItem model... it has 'category'. DTO doesn't seem to have it explicitly in previous check?
-        // Let's check MenuItemDTO again.
-        
+
         return mapper.toMenuItemDTO(repository.save(menuItem));
     }
 

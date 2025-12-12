@@ -181,7 +181,7 @@ export default function Home() {
                <div className="relative bg-white rounded-2xl shadow-lg p-4 pl-8 border border-gray-100">
                  <span className="absolute -left-6 top-2 text-3xl font-bold text-[#ff9100]">1</span>
                  <p className="font-semibold text-black">Abbiamo ricevuto la tua prenotazione!</p>
-                 <p className="text-gray-500 text-sm mt-1">In attesa dell&accettazione del ristorante</p>
+                 <p className="text-gray-500 text-sm mt-1">In attesa che il ristorante accetti</p>
                </div>
 
                {/* Step 2 */}

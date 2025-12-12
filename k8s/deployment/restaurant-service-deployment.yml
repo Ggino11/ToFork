@@ -24,6 +24,8 @@ spec:
         env:
         - name: SERVER_PORT
           value: "8083"
+        - name: JWT_SECRET
+          value: "mySecretKeyWhichIsLongEnoughForHS256"
         - name: SPRING_PROFILES_ACTIVE
           value: "prod"
         - name: SPRING_DATASOURCE_URL

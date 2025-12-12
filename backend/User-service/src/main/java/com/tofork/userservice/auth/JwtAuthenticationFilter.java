@@ -58,12 +58,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtService.validateToken(jwt)) {
                 System.out.println("--- [DEBUG] JwtAuthenticationFilter: Token valido. Inizio ricerca utente.");
-                userRepository.findByEmail(userEmail).ifPresent(user -> {
-                    // Per utenti OAuth2, la password potrebbe essere null
-                    String password = user.getPassword() != null ? user.getPassword() : "";
-                    System.out.println("--- [DEBUG] JwtAuthenticationFilter: Utente trovato nel database: " + user.getEmail());
 
-                    UserDetails userDetails = new User(user.getEmail(), user.getPassword(), new ArrayList<>());
+                userRepository.findByEmail(userEmail).ifPresent(user -> {
+                    // FIX: Calcoliamo una password sicura (stringa vuota se null)
+                    String password = user.getPassword() != null ? user.getPassword() : "";
+
+                    System.out.println("--- [DEBUG] JwtAuthenticationFilter: Utente trovato: " + user.getEmail());
+
+                    // FIX IMPORTANTE: Usiamo la variabile 'password', NON user.getPassword()
+                    UserDetails userDetails = new User(
+                            user.getEmail(),
+                            password, // <--- ORA È CORRETTO
+                            new ArrayList<>()
+                    );
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -73,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    System.out.println("--- [DEBUG] JwtAuthenticationFilter: Contesto di sicurezza aggiornato per l'utente.");
+                    System.out.println("--- [DEBUG] JwtAuthenticationFilter: Contesto di sicurezza aggiornato.");
                 });
             } else {
                 System.out.println("--- [DEBUG] JwtAuthenticationFilter: Validazione del token fallita.");
