@@ -40,7 +40,7 @@ Il sistema segue il pattern dei microservizi con un design a tre livelli, garant
 
 ### Diagramma di Flusso Dati
 *   **Richieste Esterne** → **Nginx Gateway** (`Port 80`) → **Microservizi**
-*   **Eventi Asincroni** → **RabbitMQ** (es. *Ordine Creato* → *Pagamento Richiesto*)
+*   Le comunicazioni tra microservizi avvengono tramite chiamate HTTP REST **Sincrone** (es. Payment Service -> Order Service).
 
 ---
 
@@ -50,7 +50,6 @@ Il sistema segue il pattern dei microservizi con un design a tre livelli, garant
 *   **Framework**: Spring Boot 3.5.6
 *   **Linguaggio**: Java 17
 *   **Database**: PostgreSQL 15 (Schema per-service)
-*   **Messaggistica**: RabbitMQ
 *   **Auth**: Spring Security + JWT + OAuth2
 
 ### Frontend Ecosystem
@@ -156,15 +155,33 @@ ToFork/
 Il progetto è pronto per il cloud con configurazioni K8s complete.
 
 ```bash
-# 1. Setup namespace e secrets
-kubectl apply -f k8s/namespace.yml
-kubectl apply -f k8s/secret/
+# 1. avviare minikube
+minikube start
 
-# 2. Configmaps e PVC
+# 2. Abilitare l'Ingress
+minikube addons enable ingress
+
+# 3. Collega il Terminale a Docker
+eval $(minikube docker-env)
+
+# 4. Costruzioni delle immagini Frontend e Backend
+docker build --no-cache --build-arg NEXT_PUBLIC_API_URL=http://localhost -t tofork/frontend:latest ./frontend/my-app
+
+docker build -t tofork/user-service:latest ./backend/User-service
+docker build -t tofork/order-service:latest ./backend/Order-service
+docker build -t tofork/restaurant-service:latest ./backend/Restaurant-service
+docker build -t tofork/booking-service:latest ./backend/Booking-service
+docker build -t tofork/payment-service:latest ./backend/Payment-service
+
+# 5. Setup namespace e secrets
+kubectl apply -f k8s/namespace.yml
+kubectl apply -f k8s/secret/          #//dopo averli popolati
+
+# 6. Configmaps e PVC
 kubectl apply -f k8s/db-configmap.yaml
 kubectl apply -f k8s/pvc/
 
-# 3. Deploy servizi e ingress
+# 7. Deploy servizi e ingress
 kubectl apply -f k8s/deployment/
 kubectl apply -f k8s/service/
 kubectl apply -f k8s/ingress/
